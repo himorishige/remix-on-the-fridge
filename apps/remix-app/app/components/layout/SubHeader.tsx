@@ -31,7 +31,7 @@ export const SubHeader = () => {
 
   return (
     <div className="p-4 text-white bg-sky-500">
-      <div className="flex flex-col flex-wrap justify-center items-center mx-auto">
+      <div className="flex flex-col flex-wrap justify-center items-center mx-auto h-[112px]">
         <div>
           {userList && (
             <div className="flex flex-wrap grow justify-center p-2">
