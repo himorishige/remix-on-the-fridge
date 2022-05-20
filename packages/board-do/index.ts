@@ -24,7 +24,7 @@ export default class BoardDurableObject {
   constructor(private state: DurableObjectState, private env: Env) {
     this.state.blockConcurrencyWhile(async () => {
       let storedValue = await this.state.storage.get<Message[]>('messages');
-      console.log(storedValue);
+      console.log('store', storedValue);
       this.messages = storedValue || [
         {
           message: 'Welcome to Remix on the fridge!',
@@ -42,7 +42,9 @@ export default class BoardDurableObject {
       let url = new URL(request.url);
 
       if (url.pathname === '/latest') {
-        return new Response(JSON.stringify(this.messages));
+        const data = await this.state.storage.get<Message[]>('messages');
+        if (!data) return new Response(JSON.stringify(this.messages));
+        return new Response(JSON.stringify(data));
       } else if (url.pathname === '/users') {
         let storage = await this.state.storage.get<string[]>('loginUsers');
         return new Response(JSON.stringify(storage));
@@ -192,8 +194,10 @@ export default class BoardDurableObject {
         this.broadcast(data);
 
         // Save message.
-        let key = new Date(data.timestamp).toISOString();
+        // const res = await this.state.storage.get<Message[]>('messages');
+        // if (res) {
         await this.state.storage.put('messages', [data, ...this.messages]);
+        // }
       } catch (error) {
         console.log(error);
         webSocket.send(JSON.stringify({ error: 'Something went wrong' }));
