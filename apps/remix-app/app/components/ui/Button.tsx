@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react';
 import { classNames } from '~/utils';
 
-type Props = Omit<ComponentProps<'button'>, 'className'> & { full?: boolean };
+type Props = Omit<ComponentProps<'button'>, 'className'> & { full?: string };
 
 export const Button: React.FC<Props> = (props) => {
   return (

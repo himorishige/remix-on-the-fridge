@@ -12,6 +12,7 @@ import { Button, Input } from '~/components/ui';
 import { useAtom } from 'jotai';
 import { useUpdateAtom } from 'jotai/utils';
 import {
+  boardIdAtom,
   inputValueAtom,
   newMessageAtom,
   socketAtom,
@@ -100,9 +101,11 @@ export default function Board() {
   const [socket, setSocket] = useAtom(socketAtom);
   const setUserList = useUpdateAtom(userListAtom);
   const setUsername = useUpdateAtom(usernameAtom);
+  const setBoardId = useUpdateAtom(boardIdAtom);
+
   const [inputValue, setInputValue] = useAtom(inputValueAtom);
 
-  // for japanese
+  // for japanese composition
   const [composing, setComposition] = useState(false);
   const startComposition = () => setComposition(true);
   const endComposition = () => setComposition(false);
@@ -111,7 +114,9 @@ export default function Board() {
     const hostname = window.location.host;
     if (!hostname) return;
 
+    // store global state(Jotai)
     setUsername(username);
+    setBoardId(boardId);
 
     const socket = new WebSocket(
       `${
@@ -153,6 +158,7 @@ export default function Board() {
     setUserList,
     setSocket,
     setUsername,
+    setBoardId,
   ]);
 
   const keyDownHandler: KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -205,7 +211,7 @@ export default function Board() {
             type="button"
             onClick={sendMessageHandler}
             disabled={!socket || !inputValue}
-            full
+            full="true"
           >
             Send
           </Button>
