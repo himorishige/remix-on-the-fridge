@@ -13,6 +13,7 @@ import { useAtom } from 'jotai';
 import { useUpdateAtom } from 'jotai/utils';
 import {
   boardIdAtom,
+  boardLoaderCallsAtom,
   inputValueAtom,
   newMessageAtom,
   socketAtom,
@@ -102,6 +103,7 @@ export default function Board() {
   const setUserList = useUpdateAtom(userListAtom);
   const setUsername = useUpdateAtom(usernameAtom);
   const setBoardId = useUpdateAtom(boardIdAtom);
+  const setBoardLoaderCalls = useUpdateAtom(boardLoaderCallsAtom);
 
   const [inputValue, setInputValue] = useAtom(inputValueAtom);
 
@@ -110,13 +112,17 @@ export default function Board() {
   const startComposition = () => setComposition(true);
   const endComposition = () => setComposition(false);
 
+  // initialize
   useEffect(() => {
     const hostname = window.location.host;
     if (!hostname) return;
 
+    console.log('effect');
+
     // store global state(Jotai)
     setUsername(username);
     setBoardId(boardId);
+    setBoardLoaderCalls(loaderCalls);
 
     const socket = new WebSocket(
       `${
@@ -159,6 +165,8 @@ export default function Board() {
     setSocket,
     setUsername,
     setBoardId,
+    setBoardLoaderCalls,
+    loaderCalls,
   ]);
 
   const keyDownHandler: KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -185,13 +193,7 @@ export default function Board() {
 
   return (
     <main className="p-4">
-      <dl>
-        <dt>Board ID</dt>
-        <dd style={{ wordBreak: 'break-all' }}>{boardId}</dd>
-        <dt>Visits</dt>
-        <dd>{loaderCalls}</dd>
-      </dl>
-      <div className="flex items-center py-2">
+      <div className="flex items-center pb-8">
         <div className="pr-2 w-4/5">
           <Input
             type="text"

@@ -1,11 +1,18 @@
 import { Link } from '@remix-run/react';
-import { useAtom } from 'jotai';
-import { userListAtom, usernameAtom } from '~/state/store';
+import { useAtomValue } from 'jotai';
+import {
+  boardIdAtom,
+  boardLoaderCallsAtom,
+  userListAtom,
+  usernameAtom,
+} from '~/state/store';
 import { UserAvatar } from '../elements';
 
 export const Header = () => {
-  const [userList] = useAtom(userListAtom);
-  const [username] = useAtom(usernameAtom);
+  const userList = useAtomValue(userListAtom);
+  const username = useAtomValue(usernameAtom);
+  const boardId = useAtomValue(boardIdAtom);
+  const loaderCalls = useAtomValue(boardLoaderCallsAtom);
 
   return (
     <header className="text-white bg-sky-600">
@@ -20,6 +27,8 @@ export const Header = () => {
             ))}
           </div>
         )}
+        <p className="break-all">{boardId}</p>
+        <p className="break-all">{loaderCalls}</p>
       </div>
     </header>
   );
