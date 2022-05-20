@@ -1,4 +1,8 @@
-export const Footer = () => {
+type Props = {
+  loaderCalls?: number;
+};
+
+export const Footer: React.FC<Props> = (props) => {
   return (
     <footer>
       <div className="bg-gray-100">
@@ -15,7 +19,7 @@ export const Footer = () => {
             </a>
           </p>
           <span className="mt-2 w-full text-sm text-center text-gray-500 sm:mt-0 sm:ml-auto sm:w-auto sm:text-left">
-            Remix on the fridge
+            Remix on the fridge. Root loader invocations: {props.loaderCalls}
           </span>
         </div>
       </div>

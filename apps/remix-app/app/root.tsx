@@ -50,13 +50,7 @@ const Document = ({ children }: PropsWithChildren<{}>) => {
       <body>
         <Header />
         <div className="container py-5 mx-auto">{children}</div>
-        {data && (
-          <>
-            <hr />
-            <footer>root loader invocations: {data.loaderCalls}</footer>
-          </>
-        )}
-        <Footer />
+        <Footer loaderCalls={data?.loaderCalls} />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
