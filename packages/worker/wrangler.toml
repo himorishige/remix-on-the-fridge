@@ -1,6 +1,6 @@
 account_id = ""
 compatibility_date = "2022-05-14"
-name = "on-the-fridge"
+name = "remix-on-the-fridge"
 
 main = "index.ts"
 
@@ -15,13 +15,17 @@ vars = {SESSION_SECRET = "should-be-secure-in-prod"}
 [env.dev.durable_objects]
 bindings = [
   {name = "COUNTER", class_name = "CounterDurableObject"},
+  {name = "BOARD", class_name = "BoardDurableObject"},
+  {name = "RATE_LIMITER", class_name = "RateLimiterDurableObject"},
 ]
 
 [durable_objects]
 bindings = [
   {name = "COUNTER", class_name = "CounterDurableObject"},
+  {name = "BOARD", class_name = "BoardDurableObject"},
+  {name = "RATE_LIMITER", class_name = "RateLimiterDurableObject"},
 ]
 
 [[migrations]]
-new_classes = ["CounterDurableObject"]
+new_classes = ["CounterDurableObject", "BoardDurableObject", "RateLimiterDurableObject"]
 tag = "v1"
