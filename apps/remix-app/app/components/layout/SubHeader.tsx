@@ -1,10 +1,5 @@
 import { useAtomValue } from 'jotai';
-import {
-  boardIdAtom,
-  boardLoaderCallsAtom,
-  userListAtom,
-  usernameAtom,
-} from '~/state/store';
+import { boardIdAtom, userListAtom, usernameAtom } from '~/state/store';
 import { UserAvatar } from '~/components/elements';
 import { Dialog } from '@headlessui/react';
 import { useState } from 'react';
@@ -14,7 +9,6 @@ export const SubHeader = () => {
   const userList = useAtomValue(userListAtom);
   const username = useAtomValue(usernameAtom);
   const boardId = useAtomValue(boardIdAtom);
-  const loaderCalls = useAtomValue(boardLoaderCallsAtom);
   let [isOpen, setIsOpen] = useState(false);
 
   const shareHandler: React.MouseEventHandler<HTMLButtonElement> = (event) => {
@@ -31,7 +25,7 @@ export const SubHeader = () => {
 
   return (
     <div className="p-4 text-white bg-sky-500">
-      <div className="flex flex-col flex-wrap justify-center items-center mx-auto h-[112px]">
+      <div className="flex flex-col flex-wrap justify-center items-center mx-auto min-h-[88px]">
         <div>
           {userList && (
             <div className="flex flex-wrap grow justify-center p-2">
@@ -72,7 +66,6 @@ export const SubHeader = () => {
               </svg>
             </button>
           </div>
-          <p className="text-sm break-all">Visit: {loaderCalls}</p>
         </div>
       </div>
       <Dialog
@@ -87,7 +80,7 @@ export const SubHeader = () => {
               Copied Board URL to clipboard!
             </Dialog.Title>
             <Dialog.Description className="mb-4">
-              Share the URL and use the board together!
+              Share the URL and use the board with your family and friends!
             </Dialog.Description>
             <Button onClick={() => setIsOpen(false)}>Close</Button>
           </Dialog.Panel>

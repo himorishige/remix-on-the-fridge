@@ -1,8 +1,13 @@
+import { useAtomValue } from 'jotai';
+import { boardLoaderCallsAtom } from '~/state/store';
+
 type Props = {
   loaderCalls?: number;
 };
 
 export const Footer: React.FC<Props> = (props) => {
+  const localLoaderCalls = useAtomValue(boardLoaderCallsAtom);
+
   return (
     <footer>
       <div className="bg-gray-100">
@@ -19,7 +24,8 @@ export const Footer: React.FC<Props> = (props) => {
             </a>
           </p>
           <span className="mt-2 w-full text-sm text-center text-gray-500 sm:mt-0 sm:ml-auto sm:w-auto sm:text-left">
-            Remix on the fridge. Root loader invocations: {props.loaderCalls}
+            Root loader invocations: {props.loaderCalls}. Local loader
+            invocations: {localLoaderCalls}.
           </span>
         </div>
       </div>

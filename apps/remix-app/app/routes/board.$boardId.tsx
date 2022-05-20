@@ -203,7 +203,7 @@ export default function Board() {
   return (
     <>
       <SubHeader />
-      <main className="p-4 min-h-[calc(100vh_-_68px_-_52px_-_142px)] bg-sky-200">
+      <main className="p-4 min-h-[calc(100vh_-_68px_-_52px_-_120px)] bg-sky-200">
         <div className="flex items-center pt-4 pb-8">
           <div className="pr-2 w-4/5">
             <Input
