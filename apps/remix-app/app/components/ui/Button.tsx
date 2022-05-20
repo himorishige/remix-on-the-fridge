@@ -8,7 +8,7 @@ export const Button: React.FC<Props> = (props) => {
     <button
       {...props}
       className={classNames(
-        'py-2 px-6 text-lg text-white bg-blue-500 hover:bg-blue-600 disabled:bg-slate-400 rounded border-0 focus:outline-none',
+        'py-2 px-4 text-white bg-blue-500 hover:bg-blue-600 disabled:bg-slate-400 rounded border-0 focus:outline-none',
         props.full ? 'w-full' : '',
       )}
     >

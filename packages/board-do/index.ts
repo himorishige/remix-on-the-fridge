@@ -27,7 +27,7 @@ export default class BoardDurableObject {
       console.log(storedValue);
       this.messages = storedValue || [
         {
-          message: 'Welcome to the chat room!',
+          message: 'Welcome to Remix on the fridge!',
           name: 'admin',
           timestamp: Date.now(),
         },

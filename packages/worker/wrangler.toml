@@ -28,4 +28,4 @@ bindings = [
 
 [[migrations]]
 new_classes = ["CounterDurableObject", "BoardDurableObject", "RateLimiterDurableObject"]
-tag = "v1"
+tag = "v2"

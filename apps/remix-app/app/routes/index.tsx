@@ -26,35 +26,39 @@ export const loader: LoaderFunction = async ({ context: { env }, request }) => {
 };
 
 export default function Index() {
-  const { loaderCalls, username } = useLoaderData() as LoaderData;
+  const { username } = useLoaderData() as LoaderData;
 
   return (
-    <main>
-      <Form method="post" id="username-form">
-        <label>
+    <main className="flex items-center min-h-[calc(100vh_-_68px_-_52px)] bg-sky-200">
+      <div className="flex flex-col p-8 mx-auto max-w-lg h-full bg-white rounded-lg border border-sky-400 sm:w-4/5">
+        <h2 className="mb-3 text-xl font-semibold text-gray-700">
           Choose a Username:
-          <br />
+        </h2>
+        <Form method="post" id="username-form">
           <Input
             name="username"
-            placeholder="username"
+            placeholder="Choose a Username"
             required
             maxLength={32}
             defaultValue={username}
           />
-        </label>
-        <button disabled type="submit" style={{ display: 'none' }} />
-      </Form>
-      <p>then</p>
-      <p>
-        <Button type="submit" form="username-form" formAction="/new">
-          Create a Private Board
-        </Button>
-      </p>
-      <p>or</p>
+          <button disabled type="submit" style={{ display: 'none' }} />
+        </Form>
+        <div className="mt-4">
+          <Button
+            type="submit"
+            form="username-form"
+            formAction="/new"
+            full="true"
+          >
+            Create a Private Board
+          </Button>
+        </div>
+      </div>
       <label>
-        Enter a Public Board:
+        Enter a Public Room:
         <br />
-        <Input
+        <input
           form="username-form"
           name="board"
           type="text"
@@ -62,14 +66,9 @@ export default function Index() {
           placeholder="board-name"
         />
       </label>
-      <Button type="submit" form="username-form" formAction="/join">
+      <button type="submit" form="username-form" formAction="/join">
         GO!
-      </Button>
-
-      <hr />
-      <footer>
-        <p>index loader invocations: {loaderCalls}</p>
-      </footer>
+      </button>
     </main>
   );
 }

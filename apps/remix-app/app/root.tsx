@@ -49,7 +49,7 @@ const Document = ({ children }: PropsWithChildren<{}>) => {
       </head>
       <body>
         <Header />
-        <div className="container py-5 mx-auto">{children}</div>
+        {children}
         <Footer loaderCalls={data?.loaderCalls} />
         <ScrollRestoration />
         <Scripts />

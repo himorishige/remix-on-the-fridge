@@ -20,6 +20,7 @@ import {
   userListAtom,
   usernameAtom,
 } from '~/state/store';
+import { SubHeader } from '~/components/layout';
 
 type LoaderData = {
   loaderCalls: number;
@@ -28,7 +29,7 @@ type LoaderData = {
   username: string;
 };
 
-export let action: ActionFunction = async ({ context: { env }, request }) => {
+export const action: ActionFunction = async ({ context: { env }, request }) => {
   const formData = await request.formData();
   const username = formData.get('username') || '';
 
@@ -76,6 +77,12 @@ export const loader: LoaderFunction = async ({
     .then((response) => {
       return response.json<Message[]>();
     });
+  // .then((data) => {
+  //   if (data.find((message) => message.name === username)) {
+  //     throw json(null, { status: 401 });
+  //   }
+  //   return data;
+  // });
 
   const counter = env.COUNTER.get(env.COUNTER.idFromName(`board.${boardId}`));
   const loaderCalls = counter
@@ -98,7 +105,8 @@ export default function Board() {
 
   console.log(latestMessages);
 
-  const [newMessages, setNewMessages] = useAtom(newMessageAtom);
+  // const [newMessages, setNewMessages] = useAtom(newMessageAtom);
+  const [newMessages, setNewMessages] = useState<Message[]>([]);
   const [socket, setSocket] = useAtom(socketAtom);
   const setUserList = useUpdateAtom(userListAtom);
   const setUsername = useUpdateAtom(usernameAtom);
@@ -123,6 +131,7 @@ export default function Board() {
     setUsername(username);
     setBoardId(boardId);
     setBoardLoaderCalls(loaderCalls);
+    // setNewMessages([]);
 
     const socket = new WebSocket(
       `${
@@ -192,60 +201,66 @@ export default function Board() {
   };
 
   return (
-    <main className="p-4">
-      <div className="flex items-center pb-8">
-        <div className="pr-2 w-4/5">
-          <Input
-            type="text"
-            name="message"
-            onKeyDown={keyDownHandler}
-            onCompositionStart={startComposition}
-            onCompositionEnd={endComposition}
-            disabled={!socket}
-            value={inputValue}
-            onChange={(event) => {
-              setInputValue(event.target.value);
-            }}
-          />
+    <>
+      <SubHeader />
+      <main className="p-4 min-h-[calc(100vh_-_68px_-_52px_-_142px)] bg-sky-200">
+        <div className="flex items-center pt-4 pb-8">
+          <div className="pr-2 w-4/5">
+            <Input
+              type="text"
+              name="message"
+              placeholder="Input your message"
+              onKeyDown={keyDownHandler}
+              onCompositionStart={startComposition}
+              onCompositionEnd={endComposition}
+              disabled={!socket}
+              value={inputValue}
+              onChange={(event) => {
+                setInputValue(event.target.value);
+              }}
+            />
+          </div>
+          <div className="flex justify-end w-1/5">
+            <Button
+              type="button"
+              onClick={sendMessageHandler}
+              disabled={!socket || !inputValue}
+              full="true"
+            >
+              Send
+            </Button>
+          </div>
         </div>
-        <div className="flex justify-end w-1/5">
-          <Button
-            type="button"
-            onClick={sendMessageHandler}
-            disabled={!socket || !inputValue}
-            full="true"
-          >
-            Send
-          </Button>
+        <div className="flex flex-wrap -m-2">
+          {newMessages.map((message) => (
+            <BoardCard
+              key={`${message.timestamp}`}
+              message={message}
+              isMe={username === message.name}
+            />
+          ))}
+          {latestMessages.map((message) => (
+            <BoardCard
+              key={`${message.timestamp}`}
+              message={message}
+              isMe={username === message.name}
+            />
+          ))}
         </div>
-      </div>
-      <div className="flex flex-wrap -m-2">
-        {newMessages.map((message) => (
-          <BoardCard
-            key={`${message.timestamp}`}
-            message={message}
-            isMe={username === message.name}
-          />
-        ))}
-        {latestMessages.map((message) => (
-          <BoardCard
-            key={`${message.timestamp}`}
-            message={message}
-            isMe={username === message.name}
-          />
-        ))}
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
 
 export function CatchBoundary() {
   return (
-    <main>
-      <Form method="post">
-        <input type="text" name="username" placeholder="username" />
-        <button>Go!</button>
-      </Form>
-    </main>
+    <>
+      <main>
+        <Form method="post">
+          <input type="text" name="username" placeholder="username" />
+          <button>Go!</button>
+        </Form>
+      </main>
+    </>
   );
 }
