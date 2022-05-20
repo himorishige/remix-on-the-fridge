@@ -19,7 +19,7 @@ export const action: ActionFunction = async ({ context: { env }, request }) => {
     const session = await sessionPromise;
     session.set('username', username);
 
-    return redirect(`/room/${id}`, {
+    return redirect(`/board/${id}`, {
       headers: {
         'Set-Cookie': await commitSession(session, env),
       },

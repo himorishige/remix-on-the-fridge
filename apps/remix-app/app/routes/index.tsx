@@ -47,19 +47,19 @@ export default function Index() {
       <p>then</p>
       <p>
         <Button type="submit" form="username-form" formAction="/new">
-          Create a Private Room
+          Create a Private Board
         </Button>
       </p>
       <p>or</p>
       <label>
-        Enter a Public Room:
+        Enter a Public Board:
         <br />
         <Input
           form="username-form"
-          name="room"
+          name="board"
           type="text"
           autoCapitalize="off"
-          placeholder="room-name"
+          placeholder="board-name"
         />
       </label>
       <Button type="submit" form="username-form" formAction="/join">

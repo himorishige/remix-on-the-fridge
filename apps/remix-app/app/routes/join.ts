@@ -2,16 +2,16 @@ import type { ActionFunction } from '@remix-run/cloudflare';
 import { redirect } from '@remix-run/cloudflare';
 
 import { commitSession, getSession } from '~/session.server';
-import { normalizeRoomName } from '~/utils';
+import { normalizeBoardName } from '~/utils';
 
 export const action: ActionFunction = async ({ context: { env }, request }) => {
   const formData = await request.formData();
-  const room = formData.get('room') || '';
+  const board = formData.get('board') || '';
   const username = formData.get('username') || '';
 
   if (
-    typeof room !== 'string' ||
-    !room ||
+    typeof board !== 'string' ||
+    !board ||
     typeof username !== 'string' ||
     !username
   ) {
@@ -21,12 +21,12 @@ export const action: ActionFunction = async ({ context: { env }, request }) => {
   try {
     const sessionPromise = getSession(request, env);
 
-    const id = env.BOARD.idFromName(normalizeRoomName(room)).toString();
+    const id = env.BOARD.idFromName(normalizeBoardName(board)).toString();
 
     const session = await sessionPromise;
     session.set('username', username);
 
-    return redirect(`/room/${id}`, {
+    return redirect(`/board/${id}`, {
       headers: {
         'Set-Cookie': await commitSession(session, env),
       },
