@@ -1,7 +1,6 @@
 import type { LoaderFunction, MetaFunction } from '@remix-run/cloudflare';
 import { json } from '@remix-run/cloudflare';
 import {
-  Link,
   Links,
   LiveReload,
   Meta,
@@ -12,11 +11,12 @@ import {
   useMatches,
 } from '@remix-run/react';
 import type { PropsWithChildren } from 'react';
+import { Footer, Header } from './components/layout';
 import styles from './styles/app.css';
 
 export const meta: MetaFunction = () => ({
   charset: 'utf-8',
-  title: 'New Remix App',
+  title: 'Remix on the fridge',
   viewport: 'width=device-width,initial-scale=1',
 });
 
@@ -24,22 +24,22 @@ type LoaderData = {
   loaderCalls: number;
 };
 
-export function links() {
+export const links = () => {
   return [{ rel: 'stylesheet', href: styles }];
-}
+};
 
-export let loader: LoaderFunction = async ({ context: { env } }) => {
-  let counter = env.COUNTER.get(env.COUNTER.idFromName('root'));
-  let counterResponse = await counter.fetch('https://.../increment');
-  let loaderCalls = Number.parseInt(await counterResponse.text());
+export const loader: LoaderFunction = async ({ context: { env } }) => {
+  const counter = env.COUNTER.get(env.COUNTER.idFromName('root'));
+  const counterResponse = await counter.fetch('https://.../increment');
+  const loaderCalls = Number.parseInt(await counterResponse.text());
 
   return json<LoaderData>({ loaderCalls });
 };
 
 const Document = ({ children }: PropsWithChildren<{}>) => {
-  let matches = useMatches();
-  let root = matches.find((match) => match.id === 'root');
-  let data = root?.data as LoaderData | undefined;
+  const matches = useMatches();
+  const root = matches.find((match) => match.id === 'root');
+  const data = root?.data as LoaderData | undefined;
 
   return (
     <html lang="en">
@@ -48,18 +48,15 @@ const Document = ({ children }: PropsWithChildren<{}>) => {
         <Links />
       </head>
       <body>
-        <header>
-          <h1 className="text-3xl font-bold underline">
-            <Link to="/">Remix App</Link>
-          </h1>
-        </header>
-        {children}
+        <Header />
+        <div className="container py-5 mx-auto">{children}</div>
         {data && (
           <>
             <hr />
             <footer>root loader invocations: {data.loaderCalls}</footer>
           </>
         )}
+        <Footer />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
@@ -76,8 +73,8 @@ export default function App() {
   );
 }
 
-export function CatchBoundary() {
-  let { status, statusText } = useCatch();
+export const CatchBoundary = () => {
+  const { status, statusText } = useCatch();
 
   return (
     <Document>
@@ -87,9 +84,9 @@ export function CatchBoundary() {
       </main>
     </Document>
   );
-}
+};
 
-export function ErrorBoundary({ error }: { error: Error }) {
+export const ErrorBoundary = ({ error }: { error: Error }) => {
   console.log(error);
 
   return (
@@ -99,4 +96,4 @@ export function ErrorBoundary({ error }: { error: Error }) {
       </main>
     </Document>
   );
-}
+};
