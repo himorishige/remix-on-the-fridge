@@ -11,8 +11,8 @@ import {
   useMatches,
 } from '@remix-run/react';
 import type { PropsWithChildren } from 'react';
-import { Footer, Header } from './components/layout';
-import styles from './styles/app.css';
+import { Footer, Header } from '~/components/layout';
+import styles from '~/styles/app.css';
 
 export const meta: MetaFunction = () => ({
   charset: 'utf-8',
