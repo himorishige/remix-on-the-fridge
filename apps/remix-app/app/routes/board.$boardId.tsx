@@ -255,11 +255,25 @@ export default function Board() {
 export function CatchBoundary() {
   return (
     <>
-      <main>
-        <Form method="post">
-          <input type="text" name="username" placeholder="username" />
-          <button>Go!</button>
-        </Form>
+      <main className="flex items-center min-h-[calc(100vh_-_68px_-_52px)] bg-sky-200">
+        <div className="flex flex-col p-8 mx-auto max-w-lg h-full bg-white rounded-lg border border-sky-400 sm:w-4/5">
+          <h2 className="mb-3 text-xl font-semibold text-gray-700">
+            Choose a Username:
+          </h2>
+          <Form method="post" id="username-form">
+            <Input
+              name="username"
+              placeholder="Choose a Username"
+              required
+              maxLength={32}
+            />
+          </Form>
+          <div className="mt-4">
+            <Button type="submit" full="true" form="username-form">
+              Go!
+            </Button>
+          </div>
+        </div>
       </main>
     </>
   );
