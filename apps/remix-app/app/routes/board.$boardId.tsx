@@ -34,7 +34,9 @@ export const action: ActionFunction = async ({ context: { env }, request }) => {
   const username = formData.get('username') || '';
 
   if (!username) {
-    throw json(null, { status: 401 });
+    // throw json(null, { status: 401 });
+    // for OG image response
+    throw json(null, { status: 200 });
   }
 
   const session = await getSession(request, env);
@@ -60,7 +62,9 @@ export const loader: LoaderFunction = async ({
   }
 
   if (!username) {
-    throw json(null, { status: 401 });
+    // throw json(null, { status: 401 });
+    // for OG image response
+    throw json(null, { status: 200 });
   }
 
   const board = env.BOARD.get(env.BOARD.idFromString(boardId));
@@ -77,6 +81,7 @@ export const loader: LoaderFunction = async ({
     .then((response) => {
       return response.json<Message[]>();
     });
+  // duplicated username
   // .then((data) => {
   //   if (data.find((message) => message.name === username)) {
   //     throw json(null, { status: 401 });
@@ -103,10 +108,8 @@ export default function Board() {
   const { loaderCalls, boardId, latestMessages, username } =
     useLoaderData() as LoaderData;
 
-  console.log(latestMessages);
-
-  // const [newMessages, setNewMessages] = useAtom(newMessageAtom);
-  const [newMessages, setNewMessages] = useState<Message[]>([]);
+  const [newMessages, setNewMessages] = useAtom(newMessageAtom);
+  // const [newMessages, setNewMessages] = useState<Message[]>([]);
   const [socket, setSocket] = useAtom(socketAtom);
   const setUserList = useUpdateAtom(userListAtom);
   const setUsername = useUpdateAtom(usernameAtom);
@@ -125,13 +128,11 @@ export default function Board() {
     const hostname = window.location.host;
     if (!hostname) return;
 
-    console.log('effect');
-
     // store global state(Jotai)
     setUsername(username);
     setBoardId(boardId);
     setBoardLoaderCalls(loaderCalls);
-    // setNewMessages([]);
+    setNewMessages([]);
 
     const socket = new WebSocket(
       `${
