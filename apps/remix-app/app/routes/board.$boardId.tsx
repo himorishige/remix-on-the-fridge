@@ -1,10 +1,11 @@
 import type { KeyboardEventHandler } from 'react';
+import { useCallback } from 'react';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import type { ActionFunction, LoaderFunction } from '@remix-run/cloudflare';
 import { json, redirect } from '@remix-run/cloudflare';
 import { Form, useLoaderData, useLocation } from '@remix-run/react';
-import type { Message } from 'board-do';
+import type { Message, Task } from 'board-do';
 
 import { commitSession, getSession } from '~/session.server';
 import { BoardCard, TaskCard } from '~/components/elements';
@@ -15,14 +16,23 @@ import {
   boardIdAtom,
   boardLoaderCallsAtom,
   newMessageAtom,
+  newTaskAtom,
   userListAtom,
   usernameAtom,
 } from '~/state/store';
 import { SubHeader } from '~/components/layout';
 
+type AddTaskEvent = {
+  message: Message & {
+    assignee: string;
+  };
+  event: React.MouseEvent<HTMLButtonElement, MouseEvent>;
+};
+
 type LoaderData = {
   loaderCalls: number;
   latestMessages: Message[];
+  latestTasks: Task[];
   boardId: string;
   username: string;
 };
@@ -87,6 +97,20 @@ export const loader: LoaderFunction = async ({
   //   return data;
   // });
 
+  const latestTasks = board
+    .fetch('https://.../tasks')
+    .then((response) => {
+      if (response.status !== 200) {
+        throw new Error(
+          'Something went wrong loading latest tasks\n' + response.text(),
+        );
+      }
+      return response;
+    })
+    .then((response) => {
+      return response.json<Task[]>();
+    });
+
   const counter = env.COUNTER.get(env.COUNTER.idFromName(`board.${boardId}`));
   const loaderCalls = counter
     .fetch('https://.../increment')
@@ -97,16 +121,18 @@ export const loader: LoaderFunction = async ({
     boardId,
     loaderCalls: await loaderCalls,
     latestMessages: await latestMessages,
+    latestTasks: await latestTasks,
     username,
   });
 };
 
 export default function Board() {
   const { key: locationKey } = useLocation();
-  const { loaderCalls, boardId, latestMessages, username } =
+  const { loaderCalls, boardId, latestMessages, latestTasks, username } =
     useLoaderData() as LoaderData;
 
   const [newMessages, setNewMessages] = useAtom(newMessageAtom);
+  const [newTasks, setNewTasks] = useAtom(newTaskAtom);
   // const [newMessages, setNewMessages] = useState<Message[]>([]);
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const setUserList = useUpdateAtom(userListAtom);
@@ -126,11 +152,14 @@ export default function Board() {
     const hostname = window.location.host;
     if (!hostname) return;
 
+    console.log('init');
+
     // store global state(Jotai)
     setUsername(username);
     setBoardId(boardId);
     setBoardLoaderCalls(loaderCalls);
     setNewMessages([]);
+    setNewTasks([]);
 
     const socket = new WebSocket(
       `${
@@ -157,7 +186,16 @@ export default function Board() {
       } else if (data.ready) {
         setSocket(socket);
       } else if (data.message) {
-        setNewMessages((previousValue) => [data, ...previousValue]);
+        console.log(data.message);
+        setNewMessages((previousValue) => [data.message, ...previousValue]);
+      } else if (data.task) {
+        console.log(data.task);
+        setNewTasks((previousValue) => [data.task, ...previousValue]);
+      } else if (data.closeMessage) {
+        console.log(data.closeMessage);
+        setNewMessages((previousValue) => [
+          ...previousValue.filter(({ id }) => id !== data.closeMessage),
+        ]);
       }
     });
 
@@ -169,6 +207,7 @@ export default function Board() {
     username,
     locationKey,
     setNewMessages,
+    setNewTasks,
     setUserList,
     setSocket,
     setUsername,
@@ -199,44 +238,59 @@ export default function Board() {
     }
   };
 
+  const addTaskHandler = useCallback(
+    (params: AddTaskEvent) => {
+      params.event.preventDefault();
+
+      console.log(params);
+
+      if (socket) {
+        socket.send(JSON.stringify({ task: params.message }));
+      }
+    },
+    [socket],
+  );
+
   return (
     <>
       <SubHeader />
-      <main className="p-4 min-h-[calc(100vh_-_68px_-_52px_-_120px)] bg-sky-200">
-        <div className="flex items-center pt-4 pb-8">
-          <div className="pr-2 w-4/5">
-            <Input
-              type="text"
-              name="message"
-              placeholder="Input your message"
-              onKeyDown={keyDownHandler}
-              onCompositionStart={startComposition}
-              onCompositionEnd={endComposition}
-              disabled={!socket}
-              value={inputValue}
-              onChange={(event) => {
-                setInputValue(event.target.value);
-              }}
-            />
+      <main className="grid grid-cols-3 gap-4 min-h-[calc(100vh_-_68px_-_52px_-_120px)] bg-sky-200">
+        <div className="col-span-2 p-4">
+          <div className="flex items-center pt-4 pb-8">
+            <div className="pr-2 w-4/5">
+              <Input
+                type="text"
+                name="message"
+                placeholder="Input your message"
+                onKeyDown={keyDownHandler}
+                onCompositionStart={startComposition}
+                onCompositionEnd={endComposition}
+                disabled={!socket}
+                value={inputValue}
+                onChange={(event) => {
+                  setInputValue(event.target.value);
+                }}
+              />
+            </div>
+            <div className="flex justify-end w-1/5">
+              <Button
+                type="button"
+                onClick={sendMessageHandler}
+                disabled={!socket || !inputValue}
+                full="true"
+              >
+                Send
+              </Button>
+            </div>
           </div>
-          <div className="flex justify-end w-1/5">
-            <Button
-              type="button"
-              onClick={sendMessageHandler}
-              disabled={!socket || !inputValue}
-              full="true"
-            >
-              Send
-            </Button>
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="grid col-span-2 gap-2 -m-2 md:grid-cols-2 lg:grid-cols-3">
+
+          <div className="grid gap-2 -m-2 md:grid-cols-2 lg:grid-cols-3">
             {newMessages.map((message) => (
               <BoardCard
                 key={`${message.id}`}
                 message={message}
                 isMe={username === message.name}
+                addTaskHandler={addTaskHandler}
               />
             ))}
             {latestMessages.map((message) => (
@@ -244,16 +298,19 @@ export default function Board() {
                 key={`${message.id}`}
                 message={message}
                 isMe={username === message.name}
+                addTaskHandler={addTaskHandler}
               />
             ))}
           </div>
-          <div className="flex flex-col flex-wrap">
-            {newMessages.map((message) => (
-              <TaskCard
-                key={`${message.id}`}
-                message={message}
-                isMe={username === message.name}
-              />
+        </div>
+        <div className="h-full text-gray-700 bg-sky-100">
+          <h2 className="text-lg">Tasks</h2>
+          <div className="flex flex-col flex-wrap gap-2">
+            {newTasks.map((task) => (
+              <TaskCard key={`${task.id}`} task={task} />
+            ))}
+            {latestTasks.map((task) => (
+              <TaskCard key={`${task.id}`} task={task} />
             ))}
           </div>
         </div>
