@@ -7,7 +7,17 @@ export interface Message {
   message: string;
   name: string;
   timestamp: number;
-  status: string;
+  status: 'pending' | 'assigned' | 'done';
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  timestamp: number;
+  status: 'pending' | 'assigned' | 'done';
+  messageId: string;
+  owner: string;
+  assignee: string;
 }
 
 export type Session = {
@@ -22,17 +32,33 @@ export default class BoardDurableObject {
   private lastTimestamp: number = 0;
   private loginUsers: string[] = [];
   private messages: Message[] = [];
+  private tasks: Task[] = [];
 
   constructor(private state: DurableObjectState, private env: Env) {
     this.state.blockConcurrencyWhile(async () => {
-      const storedValue = await this.state.storage.get<Message[]>('messages');
-      this.messages = storedValue || [
+      const storedMessagesValue = await this.state.storage.get<Message[]>(
+        'messages',
+      );
+      this.messages = storedMessagesValue || [
         {
           id: uuid(),
           message: 'Welcome to Remix on the fridge!',
           name: 'admin',
           timestamp: Date.now(),
-          status: 'none',
+          status: 'pending',
+        },
+      ];
+
+      const storedTasksValue = await this.state.storage.get<Task[]>('tasks');
+      this.tasks = storedTasksValue || [
+        {
+          id: uuid(),
+          title: 'Try',
+          timestamp: Date.now(),
+          status: 'pending',
+          messageId: 'none',
+          owner: 'admin',
+          assignee: 'admin',
         },
       ];
 
@@ -50,6 +76,10 @@ export default class BoardDurableObject {
       if (url.pathname === '/latest') {
         const data = await this.state.storage.get<Message[]>('messages');
         if (!data) return new Response(JSON.stringify(this.messages));
+        return new Response(JSON.stringify(data));
+      } else if (url.pathname === '/tasks') {
+        const data = await this.state.storage.get<Task[]>('tasks');
+        if (!data) return new Response(JSON.stringify(this.tasks));
         return new Response(JSON.stringify(data));
       } else if (url.pathname === '/users') {
         const data = await this.state.storage.get<string[]>('loginUsers');
@@ -177,44 +207,90 @@ export default class BoardDurableObject {
           return;
         }
 
-        // Construct sanitized message for storage and broadcast.
-        data = { name: session.name, message: '' + data.message };
+        console.log('receiveData', data);
 
-        // Block people from sending overly long messages. This is also enforced on the client,
-        // so to trigger this the user must be bypassing the client code.
-        if (data.message.length > 256) {
-          webSocket.send(JSON.stringify({ error: 'Message too long.' }));
-          return;
-        }
+        // message sequence
+        if ('message' in data) {
+          console.log('message sequence');
 
-        // Add timestamp. Here's where this.lastTimestamp comes in -- if we receive a bunch of
-        // messages at the same time (or if the clock somehow goes backwards????), we'll assign
-        // them sequential timestamps, so at least the ordering is maintained.
-        data.timestamp = Math.max(Date.now(), this.lastTimestamp + 1);
-        this.lastTimestamp = data.timestamp;
+          // Construct sanitized message for storage and broadcast.
+          data = { name: session.name, message: '' + data.message };
 
-        // Construct data for storage.
-        const storageData: Message = {
-          id: uuid(),
-          name: session.name || 'anonymous',
-          timestamp: this.lastTimestamp,
-          message: data.message,
-          status: 'none',
-        };
+          // Block people from sending overly long messages. This is also enforced on the client,
+          // so to trigger this the user must be bypassing the client code.
+          if (data.message.length > 256) {
+            webSocket.send(JSON.stringify({ error: 'Message too long.' }));
+            return;
+          }
 
-        // Broadcast the message to all other WebSockets.
-        this.broadcast(storageData);
+          // Add timestamp. Here's where this.lastTimestamp comes in -- if we receive a bunch of
+          // messages at the same time (or if the clock somehow goes backwards????), we'll assign
+          // them sequential timestamps, so at least the ordering is maintained.
+          data.timestamp = Math.max(Date.now(), this.lastTimestamp + 1);
+          this.lastTimestamp = data.timestamp;
 
-        // Save message.
-        const storage = await this.state.storage.get<Message[]>('messages');
+          // Construct data for storage.
+          const storageData: Message = {
+            id: uuid(),
+            name: session.name || 'anonymous',
+            timestamp: this.lastTimestamp,
+            message: data.message,
+            status: 'pending',
+          };
 
-        if (storage) {
-          await this.state.storage.put('messages', [storageData, ...storage]);
-        } else {
-          await this.state.storage.put('messages', [
-            storageData,
-            ...this.messages,
-          ]);
+          // Broadcast the message to all other WebSockets.
+          this.broadcast({ message: storageData });
+
+          // Save message.
+          const storage = await this.state.storage.get<Message[]>('messages');
+
+          if (storage) {
+            await this.state.storage.put('messages', [storageData, ...storage]);
+          } else {
+            await this.state.storage.put('messages', [
+              storageData,
+              ...this.messages,
+            ]);
+          }
+          // end of message sequence
+        } else if ('task' in data) {
+          console.log('task sequence');
+          console.log(data.task);
+
+          const saveData: Task = {
+            id: uuid(),
+            title: data.task.message,
+            timestamp: Date.now(),
+            status: 'assigned',
+            messageId: data.task.id,
+            assignee: data.task.assignee,
+            owner: data.task.name,
+          };
+
+          this.broadcast({ task: saveData });
+
+          // close Message
+
+          const target = await this.state.storage.get<Message[]>('messages');
+
+          if (target) {
+            const filteredMessage = target.filter(
+              (message) => message.id !== saveData.messageId,
+            );
+            await this.state.storage.put('messages', [...filteredMessage]);
+          }
+
+          this.broadcast({ closeMessage: saveData.messageId });
+
+          // Save task.
+          const storage = await this.state.storage.get<Task[]>('tasks');
+
+          if (storage) {
+            await this.state.storage.put('tasks', [saveData, ...storage]);
+          } else {
+            await this.state.storage.put('tasks', [saveData, ...this.tasks]);
+          }
+          // end of task sequence
         }
       } catch (error) {
         console.log(error);
