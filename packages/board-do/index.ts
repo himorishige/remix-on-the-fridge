@@ -1,11 +1,13 @@
 import { RateLimiterClient } from 'rate-limiter-do';
-
+import { uuid } from '@cfworker/uuid';
 import { handleErrors } from './utils';
 
 export interface Message {
+  id: string;
   message: string;
   name: string;
   timestamp: number;
+  status: string;
 }
 
 export type Session = {
@@ -23,31 +25,35 @@ export default class BoardDurableObject {
 
   constructor(private state: DurableObjectState, private env: Env) {
     this.state.blockConcurrencyWhile(async () => {
-      let storedValue = await this.state.storage.get<Message[]>('messages');
-      console.log('store', storedValue);
+      const storedValue = await this.state.storage.get<Message[]>('messages');
       this.messages = storedValue || [
         {
+          id: uuid(),
           message: 'Welcome to Remix on the fridge!',
           name: 'admin',
           timestamp: Date.now(),
+          status: 'none',
         },
       ];
-      let loggedInUsers = await this.state.storage.get<string[]>('loginUsers');
+
+      const loggedInUsers = await this.state.storage.get<string[]>(
+        'loginUsers',
+      );
       this.loginUsers = loggedInUsers || [];
     });
   }
 
   async fetch(request: Request) {
     return handleErrors(request, async () => {
-      let url = new URL(request.url);
+      const url = new URL(request.url);
 
       if (url.pathname === '/latest') {
         const data = await this.state.storage.get<Message[]>('messages');
         if (!data) return new Response(JSON.stringify(this.messages));
         return new Response(JSON.stringify(data));
       } else if (url.pathname === '/users') {
-        let storage = await this.state.storage.get<string[]>('loginUsers');
-        return new Response(JSON.stringify(storage));
+        const data = await this.state.storage.get<string[]>('loginUsers');
+        return new Response(JSON.stringify(data));
       } else if (url.pathname.startsWith('/websocket')) {
         if (request.headers.get('Upgrade') != 'websocket') {
           return new Response('expected websocket', { status: 400 });
@@ -62,7 +68,7 @@ export default class BoardDurableObject {
         // response, and we operate on the other end. Note that this API is not part of the
         // Fetch API standard; unfortunately, the Fetch API / Service Workers specs do not define
         // any way to act as a WebSocket server today.
-        let pair = new WebSocketPair();
+        const pair = new WebSocketPair();
 
         // We're going to take pair[1] as our end, and return pair[0] to the client.
         await this.handleSession(pair[1], ip);
@@ -82,8 +88,8 @@ export default class BoardDurableObject {
     webSocket.accept();
 
     // Set up our rate limiter client.
-    let limiterId = this.env.RATE_LIMITER.idFromName(ip);
-    let limiter = new RateLimiterClient(
+    const limiterId = this.env.RATE_LIMITER.idFromName(ip);
+    const limiter = new RateLimiterClient(
       () => this.env.RATE_LIMITER.get(limiterId),
       (error: any) => {
         console.log(error);
@@ -94,7 +100,7 @@ export default class BoardDurableObject {
     // Create our session and add it to the sessions list.
     // We don't send any messages to the client until it has sent us the initial user info
     // message. Until then, we will queue messages in `session.blockedMessages`.
-    let session: Session = { webSocket, blockedMessages: [] };
+    const session: Session = { webSocket, blockedMessages: [] };
     this.sessions.push(session);
 
     // Load the last 100 messages from the chat history stored on disk, and send them to the
@@ -181,23 +187,29 @@ export default class BoardDurableObject {
           return;
         }
 
-        // Filter out profanity as any public demo will bring degenerates.
-        // data.message = this.filter.clean(data.message);
-
         // Add timestamp. Here's where this.lastTimestamp comes in -- if we receive a bunch of
         // messages at the same time (or if the clock somehow goes backwards????), we'll assign
         // them sequential timestamps, so at least the ordering is maintained.
         data.timestamp = Math.max(Date.now(), this.lastTimestamp + 1);
         this.lastTimestamp = data.timestamp;
 
+        // Construct data for storage.
+        const storageData: Message = {
+          id: uuid(),
+          name: session.name || 'anonymous',
+          timestamp: this.lastTimestamp,
+          message: data.message,
+          status: 'none',
+        };
+
         // Broadcast the message to all other WebSockets.
-        this.broadcast(data);
+        this.broadcast(storageData);
 
         // Save message.
-        // const res = await this.state.storage.get<Message[]>('messages');
-        // if (res) {
-        await this.state.storage.put('messages', [data, ...this.messages]);
-        // }
+        await this.state.storage.put('messages', [
+          storageData,
+          ...this.messages,
+        ]);
       } catch (error) {
         console.log(error);
         webSocket.send(JSON.stringify({ error: 'Something went wrong' }));
@@ -206,7 +218,7 @@ export default class BoardDurableObject {
 
     // On "close" and "error" events, remove the WebSocket from the sessions list and broadcast
     // a quit message.
-    let closeOrErrorHandler = async () => {
+    const closeOrErrorHandler = async () => {
       session.quit = true;
       this.sessions = this.sessions.filter((member) => member !== session);
       let updateUsers = [
@@ -225,10 +237,10 @@ export default class BoardDurableObject {
   // broadcast() broadcasts a message to all clients.
   private broadcast(event: unknown) {
     // Apply JSON if we weren't given a string to start with.
-    let message = typeof event !== 'string' ? JSON.stringify(event) : event;
+    const message = typeof event !== 'string' ? JSON.stringify(event) : event;
 
     // Iterate over all the sessions sending them messages.
-    let quitters: Session[] = [];
+    const quitters: Session[] = [];
     this.sessions = this.sessions.filter((session) => {
       if (session.name) {
         try {
