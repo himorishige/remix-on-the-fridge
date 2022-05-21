@@ -7,7 +7,7 @@ import { Form, useLoaderData, useLocation } from '@remix-run/react';
 import type { Message } from 'board-do';
 
 import { commitSession, getSession } from '~/session.server';
-import { BoardCard } from '~/components/elements';
+import { BoardCard, TaskCard } from '~/components/elements';
 import { Button, Input } from '~/components/ui';
 import { useAtom } from 'jotai';
 import { useUpdateAtom } from 'jotai/utils';
@@ -230,21 +230,32 @@ export default function Board() {
             </Button>
           </div>
         </div>
-        <div className="flex flex-wrap -m-2">
-          {newMessages.map((message) => (
-            <BoardCard
-              key={`${message.id}`}
-              message={message}
-              isMe={username === message.name}
-            />
-          ))}
-          {latestMessages.map((message) => (
-            <BoardCard
-              key={`${message.id}`}
-              message={message}
-              isMe={username === message.name}
-            />
-          ))}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 col-span-2 gap-2 -m-2">
+            {newMessages.map((message) => (
+              <BoardCard
+                key={`${message.id}`}
+                message={message}
+                isMe={username === message.name}
+              />
+            ))}
+            {latestMessages.map((message) => (
+              <BoardCard
+                key={`${message.id}`}
+                message={message}
+                isMe={username === message.name}
+              />
+            ))}
+          </div>
+          <div className="flex flex-col flex-wrap">
+            {newMessages.map((message) => (
+              <TaskCard
+                key={`${message.id}`}
+                message={message}
+                isMe={username === message.name}
+              />
+            ))}
+          </div>
         </div>
       </main>
     </>

@@ -1,5 +1,5 @@
 import type { Message } from 'board-do';
-import { classNames, timestampToLocalString } from '~/utils';
+import { classNames } from '~/utils';
 import { IntlDate } from './IntlDate';
 
 type Props = {
@@ -10,7 +10,7 @@ type Props = {
 export const BoardCard: React.FC<Props> = ({ message, isMe }) => {
   return (
     <div
-      className="p-2 w-full text-gray-700 md:w-1/2 lg:w-1/3"
+      className="p-2 w-full text-gray-700"
       key={`${message.timestamp}${message.name}${message.message}`}
     >
       <div className="flex flex-col p-4 h-full bg-white rounded-lg border border-sky-400">
