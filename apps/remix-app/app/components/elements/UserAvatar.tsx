@@ -8,7 +8,7 @@ type Props = {
 
 export const UserAvatar: React.FC<Props> = ({ user, isMe, isWriting }) => {
   return (
-    <div className="relative p-1">
+    <div className="flex relative flex-col justify-center items-center p-1">
       {isWriting && (
         <div className="absolute right-0">
           <span className="flex relative w-3 h-3">
@@ -29,6 +29,9 @@ export const UserAvatar: React.FC<Props> = ({ user, isMe, isWriting }) => {
           title={user}
           className="overflow-hidden w-10 h-10 rounded-full"
         />
+      </div>
+      <div>
+        <span className="text-xs">{user}</span>
       </div>
     </div>
   );
