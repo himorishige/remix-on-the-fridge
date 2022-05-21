@@ -26,8 +26,8 @@ export const loader: LoaderFunction = async ({
     content: boardUrl,
     ecl: 'H',
     padding: 0,
-    width: 512,
-    height: 512,
+    width: 256,
+    height: 256,
   });
 
   const response = new Response(qr.svg(), {
