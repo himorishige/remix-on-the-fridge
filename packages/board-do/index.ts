@@ -39,28 +39,10 @@ export default class BoardDurableObject {
       const storedMessagesValue = await this.state.storage.get<Message[]>(
         'messages',
       );
-      this.messages = storedMessagesValue || [
-        {
-          id: uuid(),
-          message: 'Welcome to Remix on the fridge!',
-          name: 'admin',
-          timestamp: Date.now(),
-          status: 'pending',
-        },
-      ];
+      this.messages = storedMessagesValue || [];
 
       const storedTasksValue = await this.state.storage.get<Task[]>('tasks');
-      this.tasks = storedTasksValue || [
-        {
-          id: uuid(),
-          title: 'Try',
-          timestamp: Date.now(),
-          status: 'pending',
-          messageId: 'none',
-          owner: 'admin',
-          assignee: 'admin',
-        },
-      ];
+      this.tasks = storedTasksValue || [];
 
       const loggedInUsers = await this.state.storage.get<string[]>(
         'loginUsers',
@@ -254,8 +236,8 @@ export default class BoardDurableObject {
           }
           // end of message sequence
         } else if ('task' in data) {
+          // start of task sequence
           console.log('task sequence');
-          console.log(data.task);
 
           const saveData: Task = {
             id: uuid(),
@@ -291,6 +273,21 @@ export default class BoardDurableObject {
             await this.state.storage.put('tasks', [saveData, ...this.tasks]);
           }
           // end of task sequence
+        } else if ('completeTaskId' in data) {
+          console.log('completeTask sequence');
+
+          const target = await this.state.storage.get<Task[]>('tasks');
+
+          if (target) {
+            const filteredTask = target.filter(
+              (task) => task.id !== data.completeTaskId,
+            );
+            await this.state.storage.put('tasks', [...filteredTask]);
+          }
+
+          this.broadcast({ completeTask: data.completeTaskId });
+
+          // end of completeTask sequence
         }
       } catch (error) {
         console.log(error);
