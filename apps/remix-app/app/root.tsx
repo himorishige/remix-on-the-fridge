@@ -37,7 +37,7 @@ export const links = () => {
   return [{ rel: 'stylesheet', href: styles }];
 };
 
-const getHostname = (headers: Headers): string => {
+const getHostname = async (headers: Headers): Promise<string> => {
   const host = headers.get('X-Forwarded-Host') ?? headers.get('host');
   if (!host) {
     throw new Error('Could not determine domain URL.');
@@ -48,7 +48,7 @@ const getHostname = (headers: Headers): string => {
 };
 
 export const loader: LoaderFunction = async ({ context: { env }, request }) => {
-  const domain = getHostname(request.headers);
+  const domain = await getHostname(request.headers);
   const counter = env.COUNTER.get(env.COUNTER.idFromName('root'));
   const counterResponse = await counter.fetch('https://.../increment');
   const loaderCalls = Number.parseInt(await counterResponse.text());
