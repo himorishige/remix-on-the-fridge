@@ -206,10 +206,16 @@ export default class BoardDurableObject {
         this.broadcast(storageData);
 
         // Save message.
-        await this.state.storage.put('messages', [
-          storageData,
-          ...this.messages,
-        ]);
+        const storage = await this.state.storage.get<Message[]>('messages');
+
+        if (storage) {
+          await this.state.storage.put('messages', [storageData, ...storage]);
+        } else {
+          await this.state.storage.put('messages', [
+            storageData,
+            ...this.messages,
+          ]);
+        }
       } catch (error) {
         console.log(error);
         webSocket.send(JSON.stringify({ error: 'Something went wrong' }));
