@@ -22,10 +22,15 @@ import {
 } from '~/state/store';
 import { SubHeader } from '~/components/layout';
 
-type AddTaskEvent = {
+export type AddTaskEvent = {
   message: Message & {
     assignee: string;
   };
+  event: React.MouseEvent<HTMLButtonElement, MouseEvent>;
+};
+
+export type CompleteTaskEvent = {
+  taskId: string;
   event: React.MouseEvent<HTMLButtonElement, MouseEvent>;
 };
 
@@ -196,6 +201,11 @@ export default function Board() {
         setNewMessages((previousValue) => [
           ...previousValue.filter(({ id }) => id !== data.closeMessage),
         ]);
+      } else if (data.completeTask) {
+        console.log(data.completeTask);
+        setNewTasks((previousValue) => [
+          ...previousValue.filter(({ id }) => id !== data.completeTask),
+        ]);
       }
     });
 
@@ -251,40 +261,57 @@ export default function Board() {
     [socket],
   );
 
+  const completeTaskHandler = useCallback(
+    (params: CompleteTaskEvent) => {
+      params.event.preventDefault();
+
+      console.log(params);
+
+      if (socket) {
+        socket.send(JSON.stringify({ completeTaskId: params.taskId }));
+      }
+    },
+    [socket],
+  );
+
   return (
     <>
       <SubHeader />
-      <main className="grid grid-cols-3 gap-4 min-h-[calc(100vh_-_68px_-_52px_-_120px)] bg-sky-200">
-        <div className="col-span-2 p-4">
-          <div className="flex items-center pt-4 pb-8">
-            <div className="pr-2 w-4/5">
-              <Input
-                type="text"
-                name="message"
-                placeholder="Input your message"
-                onKeyDown={keyDownHandler}
-                onCompositionStart={startComposition}
-                onCompositionEnd={endComposition}
-                disabled={!socket}
-                value={inputValue}
-                onChange={(event) => {
-                  setInputValue(event.target.value);
-                }}
-              />
-            </div>
-            <div className="flex justify-end w-1/5">
-              <Button
-                type="button"
-                onClick={sendMessageHandler}
-                disabled={!socket || !inputValue}
-                full="true"
-              >
-                Send
-              </Button>
-            </div>
+      <div className="py-8 px-2 bg-sky-300">
+        <div className="flex items-center">
+          <div className="pr-2 w-4/5">
+            <Input
+              type="text"
+              name="message"
+              placeholder="Input your message"
+              onKeyDown={keyDownHandler}
+              onCompositionStart={startComposition}
+              onCompositionEnd={endComposition}
+              disabled={!socket}
+              value={inputValue}
+              onChange={(event) => {
+                setInputValue(event.target.value);
+              }}
+            />
           </div>
-
-          <div className="grid gap-2 -m-2 md:grid-cols-2 lg:grid-cols-3">
+          <div className="flex justify-end w-1/5">
+            <Button
+              type="button"
+              onClick={sendMessageHandler}
+              disabled={!socket || !inputValue}
+              full="true"
+            >
+              Add Sticky Note
+            </Button>
+          </div>
+        </div>
+      </div>
+      <main className="grid grid-cols-2 min-h-[calc(100vh_-_68px_-_52px_-_120px)]">
+        <div className="bg-sky-300">
+          <h2 className="p-2 text-2xl text-center text-white bg-sky-500">
+            Sticky Note
+          </h2>
+          <div className="grid gap-1 p-2 lg:grid-cols-2">
             {newMessages.map((message) => (
               <BoardCard
                 key={`${message.id}`}
@@ -303,14 +330,24 @@ export default function Board() {
             ))}
           </div>
         </div>
-        <div className="h-full text-gray-700 bg-sky-100">
-          <h2 className="text-lg">Tasks</h2>
-          <div className="flex flex-col flex-wrap gap-2">
+        <div className="bg-sky-400">
+          <h2 className="p-2 text-2xl text-center text-white bg-blue-600">
+            Task
+          </h2>
+          <div className="grid gap-1 p-2 lg:grid-cols-2">
             {newTasks.map((task) => (
-              <TaskCard key={`${task.id}`} task={task} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                completeTaskHandler={completeTaskHandler}
+              />
             ))}
             {latestTasks.map((task) => (
-              <TaskCard key={`${task.id}`} task={task} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                completeTaskHandler={completeTaskHandler}
+              />
             ))}
           </div>
         </div>
