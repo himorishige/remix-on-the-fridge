@@ -55,7 +55,7 @@ export default function Index() {
           </Button>
         </div>
       </div>
-      <label>
+      {/* <label>
         Enter a Public Room:
         <br />
         <input
@@ -68,7 +68,7 @@ export default function Index() {
       </label>
       <button type="submit" form="username-form" formAction="/join">
         GO!
-      </button>
+      </button> */}
     </main>
   );
 }

@@ -14,13 +14,13 @@ export const SubHeader = () => {
   const shareHandler: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
 
-    if (!boardId) return;
+    const boardUrl = `${window.location.origin}/board/${boardId}`;
 
-    setIsOpen(true);
+    if (!boardId || !boardUrl) return;
 
-    window.navigator.clipboard.writeText(
-      `${window.location.origin}/board/${boardId}`,
-    );
+    window.navigator.clipboard.writeText(boardUrl).then(() => {
+      alert('Copied to clipboard!');
+    });
   };
 
   return (
@@ -39,7 +39,7 @@ export const SubHeader = () => {
             <button
               type="button"
               className="pl-2 text-lg text-cyan-800 hover:text-cyan-200 transition-colors duration-200"
-              onClick={shareHandler}
+              onClick={() => setIsOpen(true)}
             >
               <svg width={24} height={24} fill="none" viewBox="0 0 24 24">
                 <path
@@ -77,12 +77,20 @@ export const SubHeader = () => {
         <div className="flex fixed inset-0 justify-center items-center p-4">
           <Dialog.Panel className="p-8 w-full max-w-sm bg-white rounded">
             <Dialog.Title className="mb-2 text-lg">
-              Copied Board URL to clipboard!
+              Share the URL and invite your family and friends to join the
+              board!
             </Dialog.Title>
             <Dialog.Description className="mb-4">
-              Share the URL and use the board with your family and friends!
+              <img
+                src={`./${boardId}.svg`}
+                alt="svg"
+                className="w-full h-auto"
+              />
             </Dialog.Description>
-            <Button onClick={() => setIsOpen(false)}>Close</Button>
+            <div className="flex justify-between items-center">
+              <Button onClick={shareHandler}>Copy Board URL</Button>
+              <Button onClick={() => setIsOpen(false)}>Close</Button>
+            </div>
           </Dialog.Panel>
         </div>
       </Dialog>
