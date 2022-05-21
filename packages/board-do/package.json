@@ -8,7 +8,9 @@
     "lint": "eslint .",
     "type-check": "tsc -b"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@cfworker/uuid": "^1.12.2"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^3.10.0",
     "cloudflare-env": "*",
