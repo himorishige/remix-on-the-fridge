@@ -231,7 +231,7 @@ export default function Board() {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-4">
-          <div className="grid grid-cols-3 col-span-2 gap-2 -m-2">
+          <div className="grid col-span-2 gap-2 -m-2 md:grid-cols-2 lg:grid-cols-3">
             {newMessages.map((message) => (
               <BoardCard
                 key={`${message.id}`}
