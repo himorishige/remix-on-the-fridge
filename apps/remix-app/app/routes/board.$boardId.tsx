@@ -301,7 +301,7 @@ export default function Board() {
               disabled={!socket || !inputValue}
               full="true"
             >
-              Add Sticky Note
+              Add
             </Button>
           </div>
         </div>
