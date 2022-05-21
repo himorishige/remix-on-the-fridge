@@ -38,7 +38,7 @@ export const BoardCard: React.FC<Props> = ({ message, isMe }) => {
           <p>{message.message}</p>
         </div>
         <div className="flex justify-end items-center pt-4 mt-auto">
-          status toTask
+          {message.status} toTask
         </div>
       </div>
     </div>

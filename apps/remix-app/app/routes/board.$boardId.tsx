@@ -14,9 +14,7 @@ import { useUpdateAtom } from 'jotai/utils';
 import {
   boardIdAtom,
   boardLoaderCallsAtom,
-  inputValueAtom,
   newMessageAtom,
-  socketAtom,
   userListAtom,
   usernameAtom,
 } from '~/state/store';
@@ -110,13 +108,13 @@ export default function Board() {
 
   const [newMessages, setNewMessages] = useAtom(newMessageAtom);
   // const [newMessages, setNewMessages] = useState<Message[]>([]);
-  const [socket, setSocket] = useAtom(socketAtom);
+  const [socket, setSocket] = useState<WebSocket | null>(null);
   const setUserList = useUpdateAtom(userListAtom);
   const setUsername = useUpdateAtom(usernameAtom);
   const setBoardId = useUpdateAtom(boardIdAtom);
   const setBoardLoaderCalls = useUpdateAtom(boardLoaderCallsAtom);
 
-  const [inputValue, setInputValue] = useAtom(inputValueAtom);
+  const [inputValue, setInputValue] = useState('');
 
   // for japanese composition
   const [composing, setComposition] = useState(false);
@@ -235,14 +233,14 @@ export default function Board() {
         <div className="flex flex-wrap -m-2">
           {newMessages.map((message) => (
             <BoardCard
-              key={`${message.timestamp}`}
+              key={`${message.id}`}
               message={message}
               isMe={username === message.name}
             />
           ))}
           {latestMessages.map((message) => (
             <BoardCard
-              key={`${message.timestamp}`}
+              key={`${message.id}`}
               message={message}
               isMe={username === message.name}
             />
