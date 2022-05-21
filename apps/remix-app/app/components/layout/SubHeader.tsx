@@ -89,7 +89,9 @@ export const SubHeader = () => {
             </Dialog.Description>
             <div className="flex justify-between items-center">
               <Button onClick={shareHandler}>Copy Board URL</Button>
-              <Button onClick={() => setIsOpen(false)}>Close</Button>
+              <Button secondary="true" onClick={() => setIsOpen(false)}>
+                Close
+              </Button>
             </div>
           </Dialog.Panel>
         </div>
