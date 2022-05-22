@@ -5,6 +5,7 @@ import { boardIdAtom } from '~/state/store';
 import { Dialog } from '@headlessui/react';
 import { useState } from 'react';
 import { Button } from '~/components/ui';
+import { SubHeader } from './SubHeader';
 
 export const Header = () => {
   const boardId = useAtomValue(boardIdAtom);
@@ -24,8 +25,8 @@ export const Header = () => {
 
   return (
     <>
-      <header className="text-white bg-sky-700">
-        <div className="container flex flex-row flex-wrap justify-between items-center py-5 mx-auto">
+      <header className="min-h-[88px] text-white bg-sky-700">
+        <div className="container flex flex-row flex-wrap justify-between items-center py-2 px-4 mx-auto">
           <Link to="/" className="flex items-center font-medium">
             <div className="w-12 h-12">
               <svg
@@ -81,10 +82,13 @@ export const Header = () => {
               Remix on the fridge
             </span>
           </Link>
-          <div className="ml-auto">
+          <div className="pr-4 ml-auto">
+            <SubHeader />
+          </div>
+          <div className="">
             <button
               type="button"
-              className="pt-2 mr-4 text-lg text-white hover:text-cyan-200 transition-colors duration-200"
+              className="pt-2 text-lg text-white hover:text-cyan-200 transition-colors duration-200"
               onClick={() => setIsOpen(true)}
             >
               <ShareIcon className="w-8 h-8" />

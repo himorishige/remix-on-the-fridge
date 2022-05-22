@@ -20,7 +20,6 @@ import {
   usernameAtom,
   usersStateAtom,
 } from '~/state/store';
-import { SubHeader } from '~/components/layout';
 
 export type AddTaskEvent = {
   message: Message & {
@@ -298,9 +297,8 @@ export default function Board() {
 
   return (
     <>
-      <SubHeader />
-      <div className="py-8 px-2 bg-sky-300">
-        <div className="flex items-center">
+      <div className="bg-sky-300">
+        <div className="container flex items-center py-8 px-4 mx-auto">
           <div className="pr-2 w-4/5">
             <Input
               type="text"
