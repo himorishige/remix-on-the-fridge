@@ -159,6 +159,7 @@ export default class BoardDurableObject {
 
         // I guess we'll use JSON.
         let data = JSON.parse(msg.data);
+        console.log('msg data', data);
 
         if (!receivedUserInfo) {
           // The first message the client sends is the user info message with their name. Save it
@@ -195,10 +196,15 @@ export default class BoardDurableObject {
               sessionData,
             ]);
           } else {
-            const user = this.usersState.find(
-              (user) => user.name === session.name,
-            );
-            user!.online = true;
+            this.usersState = this.usersState.map((user) => {
+              if (user.name === session.name) {
+                return {
+                  ...user,
+                  online: true,
+                };
+              }
+              return user;
+            });
             await this.state.storage.put('usersState', this.usersState);
           }
 
@@ -220,8 +226,6 @@ export default class BoardDurableObject {
 
         // message sequence
         if ('message' in data) {
-          console.log('message sequence');
-
           // Construct sanitized message for storage and broadcast.
           data = { name: session.name, message: '' + data.message };
 
@@ -264,7 +268,6 @@ export default class BoardDurableObject {
           // end of message sequence
         } else if ('task' in data) {
           // start of task sequence
-          console.log('task sequence');
 
           const saveData: Task = {
             id: uuid(),
@@ -301,8 +304,6 @@ export default class BoardDurableObject {
           }
           // end of task sequence
         } else if ('completeTaskId' in data) {
-          console.log('completeTask sequence');
-
           const target = await this.state.storage.get<Task[]>('tasks');
 
           if (target) {
@@ -315,6 +316,8 @@ export default class BoardDurableObject {
           this.broadcast({ completeTask: data.completeTaskId });
 
           // end of completeTask sequence
+        } else if ('ping' in data) {
+          webSocket.send(JSON.stringify({ ping: 'pong' }));
         }
       } catch (error) {
         console.log(error);
