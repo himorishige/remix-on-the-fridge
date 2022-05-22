@@ -1,5 +1,4 @@
 import type { KeyboardEventHandler } from 'react';
-import { useCallback } from 'react';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import type { ActionFunction, LoaderFunction } from '@remix-run/cloudflare';
@@ -20,6 +19,7 @@ import {
   usernameAtom,
   usersStateAtom,
 } from '~/state/store';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
 export type AddTaskEvent = {
   message: Message & {
@@ -163,7 +163,7 @@ export default function Board() {
   const [newTasks, setNewTasks] = useAtom(newTaskAtom);
   const setUsersState = useUpdateAtom(usersStateAtom);
   // const [newMessages, setNewMessages] = useState<Message[]>([]);
-  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [socket, setSocket] = useState<ReconnectingWebSocket | null>(null);
   const setUsername = useUpdateAtom(usernameAtom);
   const setBoardId = useUpdateAtom(boardIdAtom);
   const setBoardLoaderCalls = useUpdateAtom(boardLoaderCallsAtom);
@@ -190,14 +190,29 @@ export default function Board() {
     setNewTasks([]);
     setUsersState(usersState);
 
-    const socket = new WebSocket(
+    const socket = new ReconnectingWebSocket(
       `${
         window.location.protocol.startsWith('https') ? 'wss' : 'ws'
       }://${hostname}/board/${boardId}/websocket`,
     );
+
+    let pingPongTimer: any = null;
+
+    const checkConnection = () => {
+      setTimeout(() => {
+        socket.send(JSON.stringify({ ping: 'ping' }));
+        pingPongTimer = setTimeout(() => {
+          console.log('再接続を試みます');
+          pingPongTimer = null;
+          socket.reconnect();
+        }, 1000);
+      }, 30000);
+    };
+
     socket.addEventListener('open', () => {
       console.log('WebSocket opened');
       socket.send(JSON.stringify({ name: username }));
+      checkConnection();
     });
 
     socket.addEventListener('message', (event) => {
@@ -230,6 +245,13 @@ export default function Board() {
         setNewTasks((previousValue) => [
           ...previousValue.filter(({ id }) => id !== data.completeTask),
         ]);
+      } else if (data.ping) {
+        console.log('pong');
+        if (pingPongTimer) {
+          clearTimeout(pingPongTimer);
+          pingPongTimer = null;
+        }
+        return checkConnection();
       }
     });
 
