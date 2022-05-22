@@ -1,6 +1,6 @@
 import type { Message } from 'board-do';
 import { useAtomValue } from 'jotai';
-import { userListAtom } from '~/state/store';
+import { usersStateAtom } from '~/state/store';
 import { classNames } from '~/utils';
 import { IntlDate, UserSelectMenu } from '~/components/elements';
 import type { AddTaskEvent } from '~/routes/board.$boardId';
@@ -16,7 +16,7 @@ export const BoardCard: React.FC<Props> = ({
   isMe,
   addTaskHandler,
 }) => {
-  const userList = useAtomValue(userListAtom);
+  const usersState = useAtomValue(usersStateAtom);
 
   return (
     <div className="flex flex-col p-4 h-full text-gray-700 bg-white rounded-lg border border-sky-400">
@@ -47,7 +47,7 @@ export const BoardCard: React.FC<Props> = ({
         <UserSelectMenu
           addTaskHandler={addTaskHandler}
           message={message}
-          userList={userList}
+          usersState={usersState}
         />
       </div>
     </div>

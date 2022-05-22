@@ -27,10 +27,16 @@ export type Session = {
   name?: string;
 };
 
+export type UserState = {
+  id: string;
+  name: string;
+  online: boolean;
+};
+
 export default class BoardDurableObject {
   private sessions: Session[] = [];
   private lastTimestamp: number = 0;
-  private loginUsers: string[] = [];
+  private usersState: UserState[] = [];
   private messages: Message[] = [];
   private tasks: Task[] = [];
 
@@ -44,10 +50,10 @@ export default class BoardDurableObject {
       const storedTasksValue = await this.state.storage.get<Task[]>('tasks');
       this.tasks = storedTasksValue || [];
 
-      const loggedInUsers = await this.state.storage.get<string[]>(
-        'loginUsers',
+      const storedUsersState = await this.state.storage.get<UserState[]>(
+        'usersState',
       );
-      this.loginUsers = loggedInUsers || [];
+      this.usersState = storedUsersState || [];
     });
   }
 
@@ -63,8 +69,9 @@ export default class BoardDurableObject {
         const data = await this.state.storage.get<Task[]>('tasks');
         if (!data) return new Response(JSON.stringify(this.tasks));
         return new Response(JSON.stringify(data));
-      } else if (url.pathname === '/users') {
-        const data = await this.state.storage.get<string[]>('loginUsers');
+      } else if (url.pathname === '/usersState') {
+        const data = await this.state.storage.get<UserState[]>('usersState');
+        if (!data) return new Response(JSON.stringify(this.usersState));
         return new Response(JSON.stringify(data));
       } else if (url.pathname.startsWith('/websocket')) {
         if (request.headers.get('Upgrade') != 'websocket') {
@@ -172,14 +179,28 @@ export default class BoardDurableObject {
           });
           session.blockedMessages = [];
 
-          // Save message.
-          this.loginUsers = [
-            ...this.sessions.map((member) => member.name || 'anonymous'),
-          ];
-          await this.state.storage.put('loginUsers', this.loginUsers);
+          // Save UserState for this user.
+          if (
+            this.usersState.filter((user) => user.name === session.name)
+              .length === 0
+          ) {
+            const sessionData: UserState = {
+              id: uuid(),
+              name: session.name || 'anonymous',
+              online: true,
+            };
+            this.usersState = [...this.usersState, sessionData];
+            await this.state.storage.put('usersState', [
+              ...this.usersState,
+              sessionData,
+            ]);
+          }
 
           // Broadcast to all other connections that this user has joined.
-          this.broadcast({ joined: session.name, loginUsers: this.loginUsers });
+          this.broadcast({
+            joined: session.name,
+            usersState: this.usersState,
+          });
 
           webSocket.send(JSON.stringify({ ready: true }));
 
@@ -300,14 +321,27 @@ export default class BoardDurableObject {
     const closeOrErrorHandler = async () => {
       session.quit = true;
       this.sessions = this.sessions.filter((member) => member !== session);
-      let updateUsers = [
-        ...this.loginUsers.filter((name) => name !== session.name),
-      ];
-      if (session.name) {
-        this.broadcast({ quit: session.name, loginUsers: updateUsers });
-      }
 
-      await this.state.storage.put('loginUsers', updateUsers);
+      // Update usersState
+      const usersState = [
+        ...this.usersState.map((state) => {
+          if (state.name === session.name) {
+            return {
+              ...state,
+              online: false,
+            };
+          }
+          return state;
+        }),
+      ];
+      await this.state.storage.put('usersState', usersState);
+
+      if (session.name) {
+        this.broadcast({
+          quit: session.name,
+          usersState: usersState,
+        });
+      }
     };
     webSocket.addEventListener('close', closeOrErrorHandler);
     webSocket.addEventListener('error', closeOrErrorHandler);

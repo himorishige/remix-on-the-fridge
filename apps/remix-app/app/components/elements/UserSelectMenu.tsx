@@ -1,19 +1,19 @@
 import { Menu, Transition } from '@headlessui/react';
-import type { Message } from 'board-do';
+import type { Message, UserState } from 'board-do';
 import { Fragment } from 'react';
 import type { AddTaskEvent } from '~/routes/board.$boardId';
-import { UserAddIcon } from '../icons';
+import { UserAddIcon } from '~/components/icons';
 
 type Props = {
   addTaskHandler: (params: AddTaskEvent) => void;
   message: Message;
-  userList: string[];
+  usersState: UserState[];
 };
 
 export const UserSelectMenu: React.FC<Props> = ({
   addTaskHandler,
   message,
-  userList,
+  usersState,
 }) => {
   return (
     <div className="text-right">
@@ -34,8 +34,8 @@ export const UserSelectMenu: React.FC<Props> = ({
         >
           <Menu.Items className="absolute left-0 mt-2 w-56 bg-white rounded-md divide-y divide-gray-100 focus:outline-none shadow-lg origin-top-right">
             <div className="p-1 ">
-              {userList.map((user) => (
-                <Menu.Item key={user}>
+              {usersState.map((user) => (
+                <Menu.Item key={user.id}>
                   {({ active }) => (
                     <button
                       className={`${
@@ -45,13 +45,13 @@ export const UserSelectMenu: React.FC<Props> = ({
                         addTaskHandler({
                           message: {
                             ...message,
-                            assignee: user,
+                            assignee: user.name,
                           },
                           event,
                         })
                       }
                     >
-                      {user}
+                      {user.name}
                     </button>
                   )}
                 </Menu.Item>

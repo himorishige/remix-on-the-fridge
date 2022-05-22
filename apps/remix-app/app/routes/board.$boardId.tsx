@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import type { ActionFunction, LoaderFunction } from '@remix-run/cloudflare';
 import { json, redirect } from '@remix-run/cloudflare';
 import { Form, useLoaderData, useLocation } from '@remix-run/react';
-import type { Message, Task } from 'board-do';
+import type { Message, Task, UserState } from 'board-do';
 
 import { commitSession, getSession } from '~/session.server';
 import { BoardCard, TaskCard } from '~/components/elements';
@@ -17,8 +17,8 @@ import {
   boardLoaderCallsAtom,
   newMessageAtom,
   newTaskAtom,
-  userListAtom,
   usernameAtom,
+  usersStateAtom,
 } from '~/state/store';
 import { SubHeader } from '~/components/layout';
 
@@ -40,6 +40,7 @@ type LoaderData = {
   latestTasks: Task[];
   boardId: string;
   username: string;
+  usersState: UserState[];
 };
 
 export const action: ActionFunction = async ({ context: { env }, request }) => {
@@ -116,6 +117,20 @@ export const loader: LoaderFunction = async ({
       return response.json<Task[]>();
     });
 
+  const usersState = board
+    .fetch('https://.../usersState')
+    .then((response) => {
+      if (response.status !== 200) {
+        throw new Error(
+          'Something went wrong loading latest usersState\n' + response.text(),
+        );
+      }
+      return response;
+    })
+    .then((response) => {
+      return response.json<UserState[]>();
+    });
+
   const counter = env.COUNTER.get(env.COUNTER.idFromName(`board.${boardId}`));
   const loaderCalls = counter
     .fetch('https://.../increment')
@@ -127,20 +142,29 @@ export const loader: LoaderFunction = async ({
     loaderCalls: await loaderCalls,
     latestMessages: await latestMessages,
     latestTasks: await latestTasks,
+    usersState: await usersState,
     username,
   });
 };
 
 export default function Board() {
   const { key: locationKey } = useLocation();
-  const { loaderCalls, boardId, latestMessages, latestTasks, username } =
-    useLoaderData() as LoaderData;
+  const {
+    loaderCalls,
+    boardId,
+    latestMessages,
+    latestTasks,
+    username,
+    usersState,
+  } = useLoaderData() as LoaderData;
+
+  console.log('---', usersState);
 
   const [newMessages, setNewMessages] = useAtom(newMessageAtom);
   const [newTasks, setNewTasks] = useAtom(newTaskAtom);
+  const setUsersState = useUpdateAtom(usersStateAtom);
   // const [newMessages, setNewMessages] = useState<Message[]>([]);
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const setUserList = useUpdateAtom(userListAtom);
   const setUsername = useUpdateAtom(usernameAtom);
   const setBoardId = useUpdateAtom(boardIdAtom);
   const setBoardLoaderCalls = useUpdateAtom(boardLoaderCallsAtom);
@@ -165,6 +189,7 @@ export default function Board() {
     setBoardLoaderCalls(loaderCalls);
     setNewMessages([]);
     setNewTasks([]);
+    setUsersState(usersState);
 
     const socket = new WebSocket(
       `${
@@ -184,10 +209,10 @@ export default function Board() {
         return;
       } else if (data.joined) {
         console.log(`${data.joined} joined`);
-        setUserList(data.loginUsers);
+        setUsersState(data.usersState);
       } else if (data.quit) {
         console.log(`${data.quit} quit`);
-        setUserList(data.loginUsers);
+        setUsersState(data.usersState);
       } else if (data.ready) {
         setSocket(socket);
       } else if (data.message) {
@@ -216,9 +241,10 @@ export default function Board() {
     boardId,
     username,
     locationKey,
+    usersState,
     setNewMessages,
     setNewTasks,
-    setUserList,
+    setUsersState,
     setSocket,
     setUsername,
     setBoardId,
@@ -252,8 +278,6 @@ export default function Board() {
     (params: AddTaskEvent) => {
       params.event.preventDefault();
 
-      console.log(params);
-
       if (socket) {
         socket.send(JSON.stringify({ task: params.message }));
       }
@@ -264,8 +288,6 @@ export default function Board() {
   const completeTaskHandler = useCallback(
     (params: CompleteTaskEvent) => {
       params.event.preventDefault();
-
-      console.log(params);
 
       if (socket) {
         socket.send(JSON.stringify({ completeTaskId: params.taskId }));
