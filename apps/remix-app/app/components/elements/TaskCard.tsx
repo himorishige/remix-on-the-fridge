@@ -1,5 +1,4 @@
 import type { Task } from 'board-do';
-import { classNames } from '~/utils';
 import { Button } from '~/components/ui';
 import { IntlDate, UserAvatar } from '~/components/elements';
 import { CheckIcon, DoubleArrowRight } from '~/components/icons';
@@ -28,7 +27,7 @@ export const TaskCard: React.FC<Props> = ({ task, completeTaskHandler }) => {
         </div>
       </div>
       <div>
-        <p>{task.title}</p>
+        <p className="break-all">{task.title}</p>
       </div>
       <div className="flex justify-end items-center pt-4 mt-auto">
         <Button

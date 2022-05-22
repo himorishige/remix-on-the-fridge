@@ -1,7 +1,6 @@
 import type { Message } from 'board-do';
 import { useAtomValue } from 'jotai';
 import { usersStateAtom } from '~/state/store';
-import { classNames } from '~/utils';
 import { IntlDate, UserSelectMenu, UserAvatar } from '~/components/elements';
 import type { AddTaskEvent } from '~/routes/board.$boardId';
 
@@ -30,7 +29,7 @@ export const BoardCard: React.FC<Props> = ({
         </div>
       </div>
       <div>
-        <p>{message.message}</p>
+        <p className="break-all">{message.message}</p>
       </div>
       <div className="flex justify-end items-center pt-4 mt-auto">
         <UserSelectMenu
