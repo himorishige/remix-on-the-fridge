@@ -16,7 +16,8 @@ export const SubHeader = () => {
                 key={state.id}
                 user={state.name}
                 isMe={username === state.name}
-                isOnline={state.online}
+                state={state.online ? 'online' : 'offline'}
+                showName={true}
               />
             ))}
           </div>

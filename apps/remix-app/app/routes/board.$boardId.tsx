@@ -273,27 +273,21 @@ export default function Board() {
     }
   };
 
-  const addTaskHandler = useCallback(
-    (params: AddTaskEvent) => {
-      params.event.preventDefault();
+  const addTaskHandler = (params: AddTaskEvent) => {
+    params.event.preventDefault();
 
-      if (socket) {
-        socket.send(JSON.stringify({ task: params.message }));
-      }
-    },
-    [socket],
-  );
+    if (socket) {
+      socket.send(JSON.stringify({ task: params.message }));
+    }
+  };
 
-  const completeTaskHandler = useCallback(
-    (params: CompleteTaskEvent) => {
-      params.event.preventDefault();
+  const completeTaskHandler = (params: CompleteTaskEvent) => {
+    params.event.preventDefault();
 
-      if (socket) {
-        socket.send(JSON.stringify({ completeTaskId: params.taskId }));
-      }
-    },
-    [socket],
-  );
+    if (socket) {
+      socket.send(JSON.stringify({ completeTaskId: params.taskId }));
+    }
+  };
 
   return (
     <>

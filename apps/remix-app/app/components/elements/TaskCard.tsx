@@ -1,8 +1,8 @@
 import type { Task } from 'board-do';
 import { classNames } from '~/utils';
 import { Button } from '~/components/ui';
-import { IntlDate } from '~/components/elements';
-import { CheckIcon } from '~/components/icons';
+import { IntlDate, UserAvatar } from '~/components/elements';
+import { CheckIcon, DoubleArrowRight } from '~/components/icons';
 import type { CompleteTaskEvent } from '~/routes/board.$boardId';
 
 type Props = {
@@ -16,34 +16,12 @@ export const TaskCard: React.FC<Props> = ({ task, completeTaskHandler }) => {
     <div className="flex flex-col p-4 h-full text-gray-700 bg-white rounded-lg border border-sky-400">
       <div className="flex items-center mb-4">
         <div className="flex items-center">
-          <div
-            className={classNames(
-              `flex justify-center items-center w-12 h-12 rounded-full`,
-              isMe ? 'bg-indigo-300' : 'bg-indigo-100',
-            )}
-          >
-            <img
-              src={`https://avatars.dicebear.com/api/pixel-art/${task.owner}.svg`}
-              alt={task.owner}
-              className="overflow-hidden w-12 h-12 rounded-full"
-            />
-          </div>
-          &rarr;
-          <div
-            className={classNames(
-              `flex justify-center items-center w-12 h-12 rounded-full`,
-              isMe ? 'bg-indigo-300' : 'bg-indigo-100',
-            )}
-          >
-            <img
-              src={`https://avatars.dicebear.com/api/pixel-art/${task.assignee}.svg`}
-              alt={task.assignee}
-              className="overflow-hidden w-12 h-12 rounded-full"
-            />
-          </div>
+          <UserAvatar user={task.owner} isMe={isMe} />
+          <DoubleArrowRight className="w-4 h-4" />
+          <UserAvatar user={task.assignee} isMe={isMe} />
         </div>
         <div className="flex flex-col grow pl-2">
-          <p className="text-lg font-medium">{task.assignee}</p>
+          <p className="font-medium">{task.assignee}</p>
           <p className="text-xs text-gray-400">
             <IntlDate date={new Date(task.timestamp)} />
           </p>

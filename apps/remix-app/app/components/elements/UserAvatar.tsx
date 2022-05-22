@@ -1,16 +1,32 @@
 import { classNames } from '~/utils';
 
+type Size = 'small' | 'medium' | 'large';
+
 type Props = {
   user: string;
-  isMe: boolean;
-  isOnline?: boolean;
+  isMe?: boolean;
+  state?: 'online' | 'offline' | 'none';
+  showName?: boolean;
+  size?: Size;
 };
 
-export const UserAvatar: React.FC<Props> = ({ user, isMe, isOnline }) => {
+const sizes: Record<Size, string> = {
+  small: 'w-8 h-8',
+  medium: 'w-10 h-10',
+  large: 'w-12 h-12',
+} as const;
+
+export const UserAvatar: React.FC<Props> = ({
+  user,
+  isMe = false,
+  state = 'none',
+  showName = false,
+  size = 'medium',
+}) => {
   return (
     <div className="flex flex-col justify-center items-center p-1">
       <div className="flex relative flex-col justify-center items-center">
-        {isOnline && (
+        {state === 'online' && (
           <>
             <div className="absolute top-0 right-0">
               <span className="flex relative w-3 h-3">
@@ -21,12 +37,18 @@ export const UserAvatar: React.FC<Props> = ({ user, isMe, isOnline }) => {
           </>
         )}
 
-        {!isOnline && (
-          <div className="absolute w-10 h-10 bg-blue-300 rounded-full opacity-70"></div>
+        {state === 'offline' && (
+          <div
+            className={classNames(
+              'absolute bg-blue-300 rounded-full opacity-70',
+              sizes[size],
+            )}
+          ></div>
         )}
         <div
           className={classNames(
-            `flex justify-center items-center w-10 h-10 rounded-full`,
+            `flex justify-center items-center rounded-full`,
+            sizes[size],
             isMe ? 'bg-orange-200' : 'bg-indigo-100',
           )}
         >
@@ -34,15 +56,22 @@ export const UserAvatar: React.FC<Props> = ({ user, isMe, isOnline }) => {
             src={`https://avatars.dicebear.com/api/pixel-art/${user}.svg`}
             alt={user}
             title={user}
-            className="overflow-hidden w-10 h-10 rounded-full"
+            className={classNames('overflow-hidden rounded-full', sizes[size])}
           />
         </div>
       </div>
-      <div>
-        <span className={classNames('text-xs', !isOnline && 'text-gray-200')}>
-          {user}
-        </span>
-      </div>
+      {showName && (
+        <div>
+          <span
+            className={classNames(
+              'text-xs',
+              state === 'offline' && 'text-gray-200',
+            )}
+          >
+            {user}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

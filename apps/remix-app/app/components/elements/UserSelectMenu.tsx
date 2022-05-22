@@ -2,7 +2,8 @@ import { Menu, Transition } from '@headlessui/react';
 import type { Message, UserState } from 'board-do';
 import { Fragment } from 'react';
 import type { AddTaskEvent } from '~/routes/board.$boardId';
-import { UserAddIcon } from '~/components/icons';
+import { ArrowDown, UserAddIcon } from '~/components/icons';
+import { UserAvatar } from './UserAvatar';
 
 type Props = {
   addTaskHandler: (params: AddTaskEvent) => void;
@@ -21,6 +22,7 @@ export const UserSelectMenu: React.FC<Props> = ({
         <div>
           <Menu.Button className="inline-flex justify-center py-2 px-4 w-full text-sm font-medium text-white bg-sky-500 hover:bg-sky-700 rounded focus:outline-none">
             <UserAddIcon className="w-4 h-4" />
+            <ArrowDown className="ml-1 w-4 h-4" />
           </Menu.Button>
         </div>
         <Transition
@@ -32,7 +34,7 @@ export const UserSelectMenu: React.FC<Props> = ({
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute left-0 mt-2 w-56 bg-white rounded-md divide-y divide-gray-100 focus:outline-none shadow-lg origin-top-right">
+          <Menu.Items className="absolute left-0 mt-2 min-w-[224px] bg-white rounded-md divide-y divide-gray-100 focus:outline-none shadow-lg origin-top-right">
             <div className="p-1 ">
               {usersState.map((user) => (
                 <Menu.Item key={user.id}>
@@ -51,7 +53,8 @@ export const UserSelectMenu: React.FC<Props> = ({
                         })
                       }
                     >
-                      {user.name}
+                      <UserAvatar user={user.name} size="small" />
+                      <span className="text-sm">{user.name}</span>
                     </button>
                   )}
                 </Menu.Item>
