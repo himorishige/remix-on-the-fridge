@@ -11,9 +11,9 @@ export const SubHeader = () => {
       <div className="flex flex-col flex-wrap justify-center items-center mx-auto">
         <div>
           <div className="flex flex-wrap grow justify-center">
-            {usersState.map((state) => (
+            {usersState.map((state, index) => (
               <UserAvatar
-                key={state.id}
+                key={`${state.id}-${index}`}
                 user={state.name}
                 isMe={username === state.name}
                 state={state.online ? 'online' : 'offline'}

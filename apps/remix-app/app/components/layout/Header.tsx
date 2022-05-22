@@ -25,7 +25,7 @@ export const Header = () => {
 
   return (
     <>
-      <header className="min-h-[88px] text-white bg-sky-700">
+      <header className="text-white bg-sky-700">
         <div className="container flex flex-row flex-wrap justify-between items-center py-2 px-4 mx-auto">
           <Link to="/" className="flex items-center font-medium">
             <div className="w-12 h-12">
