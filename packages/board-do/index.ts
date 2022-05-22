@@ -194,6 +194,12 @@ export default class BoardDurableObject {
               ...this.usersState,
               sessionData,
             ]);
+          } else {
+            const user = this.usersState.find(
+              (user) => user.name === session.name,
+            );
+            user!.online = true;
+            await this.state.storage.put('usersState', this.usersState);
           }
 
           // Broadcast to all other connections that this user has joined.
