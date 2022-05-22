@@ -1,27 +1,38 @@
 account_id = ""
 compatibility_date = "2022-05-14"
-name = "on-the-fridge"
+name = "remix-on-the-fridge"
 
 main = "index.ts"
 
 workers_dev = true
+
+kv_namespaces = [
+  { binding = "SESSION_KV", id = "3fa3ff56bb454b30878a5c7034869cf9", preview_id = "a1a2a6017f7f4c2485258ece761ca0c0" },
+]
 
 [site]
 bucket = "../../apps/remix-app/public"
 
 [env.dev]
 vars = {SESSION_SECRET = "should-be-secure-in-prod"}
+kv_namespaces = [
+  { binding = "SESSION_KV", id = "3fa3ff56bb454b30878a5c7034869cf9", preview_id = "a1a2a6017f7f4c2485258ece761ca0c0" },
+]
 
 [env.dev.durable_objects]
 bindings = [
   {name = "COUNTER", class_name = "CounterDurableObject"},
+  {name = "BOARD", class_name = "BoardDurableObject"},
+  {name = "RATE_LIMITER", class_name = "RateLimiterDurableObject"},
 ]
 
 [durable_objects]
 bindings = [
   {name = "COUNTER", class_name = "CounterDurableObject"},
+  {name = "BOARD", class_name = "BoardDurableObject"},
+  {name = "RATE_LIMITER", class_name = "RateLimiterDurableObject"},
 ]
 
 [[migrations]]
-new_classes = ["CounterDurableObject"]
+new_classes = ["CounterDurableObject", "BoardDurableObject", "RateLimiterDurableObject"]
 tag = "v1"
