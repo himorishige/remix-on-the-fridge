@@ -4,6 +4,7 @@
   "private": true,
   "workspaces": [
     "apps/*",
+    "services/*",
     "packages/*"
   ],
   "scripts": {
@@ -12,7 +13,7 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "type-check": "turbo run type-check",
-    "deploy": "turbo run build && cd packages/worker && wrangler publish index.ts"
+    "deploy": "turbo run build && cd services/worker && wrangler publish index.ts"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^3.10.0",
