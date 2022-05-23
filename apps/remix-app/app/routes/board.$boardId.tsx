@@ -1,4 +1,5 @@
 import type { KeyboardEventHandler } from 'react';
+import { Fragment } from 'react';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import type { ActionFunction, LoaderFunction } from '@remix-run/cloudflare';
@@ -20,6 +21,9 @@ import {
   usersStateAtom,
 } from '~/state/store';
 import ReconnectingWebSocket from 'reconnecting-websocket';
+import { Tab, Listbox, Transition } from '@headlessui/react';
+import { classNames } from '~/utils';
+import { CheckIcon, SelectorIcon } from '~/components/icons';
 
 export type AddTaskEvent = {
   message: Message & {
@@ -311,82 +315,173 @@ export default function Board() {
     }
   };
 
+  const categories = ['Sticky Note', 'Task'];
+  const people = [
+    { name: 'Wade Cooper' },
+    { name: 'Arlene Mccoy' },
+    { name: 'Devon Webb' },
+    { name: 'Tom Cook' },
+    { name: 'Tanya Fox' },
+    { name: 'Hellen Schmidt' },
+  ];
+  const [selected, setSelected] = useState(people[0]);
+  console.log(selected);
+
   return (
     <>
-      <div className="bg-sky-300">
-        <div className="container flex items-center py-8 px-4 mx-auto">
-          <div className="pr-2 w-4/5">
-            <Input
-              type="text"
-              name="message"
-              placeholder="Input your message"
-              onKeyDown={keyDownHandler}
-              onCompositionStart={startComposition}
-              onCompositionEnd={endComposition}
-              disabled={!socket}
-              value={inputValue}
-              onChange={(event) => {
-                setInputValue(event.target.value);
-              }}
-            />
-          </div>
-          <div className="flex justify-end w-1/5">
-            <Button
-              type="button"
-              onClick={sendMessageHandler}
-              disabled={!socket || !inputValue}
-              full="true"
-            >
-              Add
-            </Button>
-          </div>
-        </div>
-      </div>
-      <main className="grid grid-cols-2 min-h-[calc(100vh_-_68px_-_52px_-_120px)]">
-        <div className="bg-sky-300">
-          <h2 className="p-2 text-2xl text-center text-white bg-sky-500">
-            Sticky Note
-          </h2>
-          <div className="grid gap-1 p-2 lg:grid-cols-2">
-            {newMessages.map((message) => (
-              <BoardCard
-                key={`${message.id}`}
-                message={message}
-                isMe={username === message.name}
-                addTaskHandler={addTaskHandler}
-              />
+      <main className="min-h-[calc(100vh_-_88px_-_52px)] bg-sky-200">
+        <Tab.Group>
+          <Tab.List className="flex p-2 space-x-1 bg-sky-500">
+            {categories.map((category) => (
+              <Tab
+                key={category}
+                className={({ selected }) =>
+                  classNames(
+                    'w-full rounded py-2.5 font-medium leading-5 text-sky-800',
+                    'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
+                    selected
+                      ? 'bg-white shadow'
+                      : 'text-blue-400 hover:bg-white/[0.12] hover:text-white',
+                  )
+                }
+              >
+                {category}
+              </Tab>
             ))}
-            {latestMessages.map((message) => (
-              <BoardCard
-                key={`${message.id}`}
-                message={message}
-                isMe={username === message.name}
-                addTaskHandler={addTaskHandler}
-              />
-            ))}
-          </div>
-        </div>
-        <div className="bg-sky-400">
-          <h2 className="p-2 text-2xl text-center text-white bg-blue-600">
-            Task
-          </h2>
-          <div className="grid gap-1 p-2 lg:grid-cols-2">
-            {newTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                completeTaskHandler={completeTaskHandler}
-              />
-            ))}
-            {latestTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                completeTaskHandler={completeTaskHandler}
-              />
-            ))}
-          </div>
-        </div>
+          </Tab.List>
+          <Tab.Panels className="">
+            <Tab.Panel>
+              <div className="">
+                <div className="">
+                  <div className="flex items-center px-2 pt-4 pb-2 mx-auto">
+                    <div className="pr-2 w-4/5">
+                      <Input
+                        type="text"
+                        name="message"
+                        placeholder="Input your message"
+                        onKeyDown={keyDownHandler}
+                        onCompositionStart={startComposition}
+                        onCompositionEnd={endComposition}
+                        disabled={!socket}
+                        value={inputValue}
+                        onChange={(event) => {
+                          setInputValue(event.target.value);
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-end w-1/5">
+                      <Button
+                        type="button"
+                        onClick={sendMessageHandler}
+                        disabled={!socket || !inputValue}
+                        full="true"
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid gap-1 p-2 h-full lg:grid-cols-4">
+                  {newMessages.map((message) => (
+                    <BoardCard
+                      key={`${message.id}`}
+                      message={message}
+                      isMe={username === message.name}
+                      addTaskHandler={addTaskHandler}
+                    />
+                  ))}
+                  {latestMessages.map((message) => (
+                    <BoardCard
+                      key={`${message.id}`}
+                      message={message}
+                      isMe={username === message.name}
+                      addTaskHandler={addTaskHandler}
+                    />
+                  ))}
+                </div>
+              </div>
+            </Tab.Panel>
+            <Tab.Panel>
+              <div className="">
+                <div className="p-2">
+                  <Listbox value={selected} onChange={setSelected}>
+                    <div className="relative mt-1">
+                      <Listbox.Button className="relative py-2 pr-10 pl-3 w-full text-left bg-white rounded-lg focus-visible:border-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 shadow-md cursor-default sm:text-sm">
+                        <span className="block truncate">{selected.name}</span>
+                        <span className="flex absolute inset-y-0 right-0 items-center pr-2 pointer-events-none">
+                          <SelectorIcon
+                            className="w-5 h-5 text-gray-400"
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </Listbox.Button>
+                      <Transition
+                        as={Fragment}
+                        leave="transition ease-in duration-100"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <Listbox.Options className="overflow-auto absolute z-10 py-1 mt-1 w-full max-h-60 text-base bg-white rounded-md focus:outline-none ring-1 ring-black/5 shadow-lg sm:text-sm">
+                          {people.map((person, personIdx) => (
+                            <Listbox.Option
+                              key={personIdx}
+                              className={({ active }) =>
+                                `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                  active
+                                    ? 'bg-amber-100 text-amber-900'
+                                    : 'text-gray-900'
+                                }`
+                              }
+                              value={person}
+                            >
+                              {() => (
+                                <>
+                                  <span
+                                    className={`block truncate ${
+                                      selected.name === person.name
+                                        ? 'font-medium'
+                                        : 'font-normal'
+                                    }`}
+                                  >
+                                    {person.name}11
+                                  </span>
+                                  {selected.name === person.name ? (
+                                    <span className="flex absolute inset-y-0 left-0 items-center pl-3 text-amber-600">
+                                      <CheckIcon
+                                        className="w-5 h-5"
+                                        aria-hidden="true"
+                                      />
+                                    </span>
+                                  ) : null}
+                                </>
+                              )}
+                            </Listbox.Option>
+                          ))}
+                        </Listbox.Options>
+                      </Transition>
+                    </div>
+                  </Listbox>
+                </div>
+                <div className="grid gap-1 p-2 lg:grid-cols-4">
+                  {newTasks.map((task) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      completeTaskHandler={completeTaskHandler}
+                    />
+                  ))}
+                  {latestTasks.map((task) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      completeTaskHandler={completeTaskHandler}
+                    />
+                  ))}
+                </div>
+              </div>
+            </Tab.Panel>
+          </Tab.Panels>
+        </Tab.Group>
       </main>
     </>
   );
@@ -395,7 +490,7 @@ export default function Board() {
 export function CatchBoundary() {
   return (
     <>
-      <main className="flex items-center min-h-[calc(100vh_-_68px_-_52px)] bg-sky-200">
+      <main className="flex items-center min-h-[calc(100vh_-_68px_-_52px)] bg-sky-300">
         <div className="flex flex-col p-8 mx-auto max-w-lg h-full bg-white rounded-lg border border-sky-400 sm:w-4/5">
           <h2 className="mb-3 text-xl font-semibold text-gray-700">
             Choose a Username:

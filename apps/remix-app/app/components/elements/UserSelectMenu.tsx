@@ -34,7 +34,7 @@ export const UserSelectMenu: React.FC<Props> = ({
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute left-0 z-50 mt-2 min-w-[224px] bg-white rounded-md divide-y divide-gray-100 focus:outline-none shadow-lg origin-top-right">
+          <Menu.Items className="absolute right-0 z-50 mt-2 min-w-[224px] bg-white rounded-md divide-y divide-gray-100 focus:outline-none shadow-lg origin-top-right">
             <div className="p-1 ">
               {usersState.map((user) => (
                 <Menu.Item key={user.id}>
