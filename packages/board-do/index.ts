@@ -1,5 +1,4 @@
 import { RateLimiterClient } from 'rate-limiter-do';
-import { uuid } from '@cfworker/uuid';
 import { handleErrors } from './utils';
 
 export interface Message {
@@ -7,7 +6,6 @@ export interface Message {
   message: string;
   name: string;
   timestamp: number;
-  status: 'pending' | 'assigned' | 'done';
 }
 
 export interface Task {
@@ -15,7 +13,6 @@ export interface Task {
   title: string;
   timestamp: number;
   status: 'pending' | 'assigned' | 'done';
-  messageId: string;
   owner: string;
   assignee: string;
 }
@@ -37,23 +34,15 @@ export default class BoardDurableObject {
   private sessions: Session[] = [];
   private lastTimestamp: number = 0;
   private usersState: UserState[] = [];
-  private messages: Message[] = [];
   private tasks: Task[] = [];
+  private boardId: string = '';
 
   constructor(private state: DurableObjectState, private env: Env) {
     this.state.blockConcurrencyWhile(async () => {
-      const storedMessagesValue = await this.state.storage.get<Message[]>(
-        'messages',
-      );
-      this.messages = storedMessagesValue || [];
-
       const storedTasksValue = await this.state.storage.get<Task[]>('tasks');
       this.tasks = storedTasksValue || [];
 
-      const storedUsersState = await this.state.storage.get<UserState[]>(
-        'usersState',
-      );
-      this.usersState = storedUsersState || [];
+      this.boardId = this.state.id.toString();
     });
   }
 
@@ -62,17 +51,32 @@ export default class BoardDurableObject {
       const url = new URL(request.url);
 
       if (url.pathname === '/latest') {
-        const data = await this.state.storage.get<Message[]>('messages');
-        if (!data) return new Response(JSON.stringify(this.messages));
-        return new Response(JSON.stringify(data));
+        const data = await this.state.storage.list<Message>({
+          reverse: true,
+          limit: 100,
+        });
+        const messages = [...data.values()];
+        console.log(messages);
+
+        return new Response(JSON.stringify(messages));
       } else if (url.pathname === '/tasks') {
-        const data = await this.state.storage.get<Task[]>('tasks');
-        if (!data) return new Response(JSON.stringify(this.tasks));
-        return new Response(JSON.stringify(data));
+        //
+        const stickyId = this.env.STICKY.idFromName(this.state.id.toString());
+        const sticky = this.env.STICKY.get(stickyId);
+
+        const stickyResponse = await sticky.fetch('https://.../latest');
+        return new Response(JSON.stringify(await stickyResponse.json()));
+        //
       } else if (url.pathname === '/usersState') {
-        const data = await this.state.storage.get<UserState[]>('usersState');
-        if (!data) return new Response(JSON.stringify(this.usersState));
-        return new Response(JSON.stringify(data));
+        //
+        const userStateId = this.env.USER_STATE.idFromName(
+          this.state.id.toString(),
+        );
+        const userState = this.env.USER_STATE.get(userStateId);
+
+        const userStateResponse = await userState.fetch('https://.../latest');
+        return new Response(JSON.stringify(await userStateResponse.json()));
+        //
       } else if (url.pathname.startsWith('/websocket')) {
         if (request.headers.get('Upgrade') != 'websocket') {
           return new Response('expected websocket', { status: 400 });
@@ -165,7 +169,6 @@ export default class BoardDurableObject {
           // The first message the client sends is the user info message with their name. Save it
           // into their session object.
           session.name = '' + (data.name || 'anonymous');
-
           // Don't let people use ridiculously long names. (This is also enforced on the client,
           // so if they get here they are not using the intended client.)
           if (session.name.length > 32) {
@@ -180,38 +183,58 @@ export default class BoardDurableObject {
           });
           session.blockedMessages = [];
 
+          const userStateId = this.env.USER_STATE.idFromName(
+            this.state.id.toString(),
+          );
+          const userState = this.env.USER_STATE.get(userStateId);
+
+          const userData: UserState = {
+            id: new Date(Date.now()).toISOString(),
+            name: session.name,
+            online: true,
+          };
+
+          await userState.fetch('https://.../add', {
+            method: 'POST',
+            body: JSON.stringify(userData),
+            headers: { 'Content-Type': 'application/json' },
+          });
+
           // Save UserState for this user.
-          if (
-            this.usersState.filter((user) => user.name === session.name)
-              .length === 0
-          ) {
-            const sessionData: UserState = {
-              id: uuid(),
-              name: session.name || 'anonymous',
-              online: true,
-            };
-            this.usersState = [...this.usersState, sessionData];
-            await this.state.storage.put('usersState', [
-              ...this.usersState,
-              sessionData,
-            ]);
-          } else {
-            this.usersState = this.usersState.map((user) => {
-              if (user.name === session.name) {
-                return {
-                  ...user,
-                  online: true,
-                };
-              }
-              return user;
-            });
-            await this.state.storage.put('usersState', this.usersState);
-          }
+
+          // if (
+          //   this.usersState.filter((user) => user.name === session.name)
+          //     .length === 0
+          // ) {
+          //   const sessionData: UserState = {
+          //     id: uuid(),
+          //     name: session.name || 'anonymous',
+          //     online: true,
+          //   };
+          //   this.usersState = [...this.usersState, sessionData];
+          //   await this.state.storage.put('usersState', [
+          //     ...this.usersState,
+          //     sessionData,
+          //   ]);
+          // } else {
+          //   this.usersState = this.usersState.map((user) => {
+          //     if (user.name === session.name) {
+          //       return {
+          //         ...user,
+          //         online: true,
+          //       };
+          //     }
+          //     return user;
+          //   });
+          //   await this.state.storage.put('usersState', this.usersState);
+          // }
 
           // Broadcast to all other connections that this user has joined.
           this.broadcast({
             joined: session.name,
-            usersState: this.usersState,
+            usersState: await (
+              await userState.fetch('https://.../latest')
+            ).json(),
           });
 
           webSocket.send(JSON.stringify({ ready: true }));
@@ -243,77 +266,56 @@ export default class BoardDurableObject {
           this.lastTimestamp = data.timestamp;
 
           // Construct data for storage.
-          const storageData: Message = {
-            id: uuid(),
+          const messageData: Message = {
+            id: new Date(data.timestamp).toISOString(),
             name: session.name || 'anonymous',
             timestamp: this.lastTimestamp,
             message: data.message,
-            status: 'pending',
           };
 
           // Broadcast the message to all other WebSockets.
-          this.broadcast({ message: storageData });
+          this.broadcast({ message: messageData });
 
-          // Save message.
-          const storage = await this.state.storage.get<Message[]>('messages');
+          await this.state.storage.put(messageData.id, messageData);
 
-          if (storage) {
-            await this.state.storage.put('messages', [storageData, ...storage]);
-          } else {
-            await this.state.storage.put('messages', [
-              storageData,
-              ...this.messages,
-            ]);
-          }
           // end of message sequence
         } else if ('task' in data) {
           // start of task sequence
 
           const saveData: Task = {
-            id: uuid(),
+            id: new Date(Date.now()).toISOString(),
             title: data.task.message,
             timestamp: Date.now(),
             status: 'assigned',
-            messageId: data.task.id,
             assignee: data.task.assignee,
             owner: data.task.name,
           };
 
-          this.broadcast({ task: saveData });
-
-          // close Message
-
-          const target = await this.state.storage.get<Message[]>('messages');
-
-          if (target) {
-            const filteredMessage = target.filter(
-              (message) => message.id !== saveData.messageId,
-            );
-            await this.state.storage.put('messages', [...filteredMessage]);
-          }
-
-          this.broadcast({ closeMessage: saveData.messageId });
-
           // Save task.
-          const storage = await this.state.storage.get<Task[]>('tasks');
+          const stickyId = this.env.STICKY.idFromName(this.state.id.toString());
+          const sticky = this.env.STICKY.get(stickyId);
+          const stickyResponse = await sticky.fetch('https://.../add', {
+            method: 'POST',
+            body: JSON.stringify(saveData),
+            headers: { 'Content-Type': 'application/json' },
+          });
 
-          if (storage) {
-            await this.state.storage.put('tasks', [saveData, ...storage]);
-          } else {
-            await this.state.storage.put('tasks', [saveData, ...this.tasks]);
-          }
+          this.broadcast({ task: await stickyResponse.json() });
+
           // end of task sequence
         } else if ('completeTaskId' in data) {
-          const target = await this.state.storage.get<Task[]>('tasks');
+          const stickyId = this.env.STICKY.idFromName(this.state.id.toString());
+          const sticky = this.env.STICKY.get(stickyId);
+          const stickyResponse = await sticky.fetch('https://.../delete', {
+            method: 'POST',
+            body: JSON.stringify({ id: data.completeTaskId }),
+            headers: { 'Content-Type': 'application/json' },
+          });
 
-          if (target) {
-            const filteredTask = target.filter(
-              (task) => task.id !== data.completeTaskId,
-            );
-            await this.state.storage.put('tasks', [...filteredTask]);
-          }
-
-          this.broadcast({ completeTask: data.completeTaskId });
+          this.broadcast({
+            completeTask: data.completeTaskId,
+            response: await stickyResponse.json(),
+          });
 
           // end of completeTask sequence
         } else if ('ping' in data) {
@@ -332,23 +334,37 @@ export default class BoardDurableObject {
       this.sessions = this.sessions.filter((member) => member !== session);
 
       // Update usersState
-      const usersState = [
-        ...this.usersState.map((state) => {
-          if (state.name === session.name) {
-            return {
-              ...state,
-              online: false,
-            };
-          }
-          return state;
-        }),
-      ];
-      await this.state.storage.put('usersState', usersState);
+
+      // const usersState = [
+      //   ...this.usersState.map((state) => {
+      //     if (state.name === session.name) {
+      //       return {
+      //         ...state,
+      //         online: false,
+      //       };
+      //     }
+      //     return state;
+      //   }),
+      // ];
+      // await this.state.storage.put('usersState', usersState);
 
       if (session.name) {
+        const userStateId = this.env.USER_STATE.idFromName(
+          this.state.id.toString(),
+        );
+        const userState = this.env.USER_STATE.get(userStateId);
+
+        await userState.fetch('https://.../delete', {
+          method: 'POST',
+          body: JSON.stringify({ id: session.name }),
+          headers: { 'Content-Type': 'application/json' },
+        });
+
         this.broadcast({
           quit: session.name,
-          usersState: usersState,
+          usersState: await (
+            await userState.fetch('https://.../latest')
+          ).json(),
         });
       }
     };
