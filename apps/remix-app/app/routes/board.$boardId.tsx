@@ -359,7 +359,7 @@ export default function Board() {
               </div>
             </div>
           </div>
-          <div className="grid overflow-auto p-2 max-h-60 sm:max-h-full lg:grid-cols-1">
+          <div className="grid overflow-auto p-2 h-full max-h-60 sm:max-h-full lg:grid-cols-1">
             <div className="">
               {newMessages.map((message) => (
                 <BoardCard
