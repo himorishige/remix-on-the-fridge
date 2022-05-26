@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.corner_box {
+  position: relative;
+}
+
+.corner_box_outer {
+  box-shadow: inset 0 0 30px rgba(255, 219, 112, 0.8);
+}
+
+.corner_box:before {
+  content: ' ';
+  display: block;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  border-width: 0 30px 30px 0;
+  border-style: solid;
+  width: 0;
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+.corner_box_outer:before {
+  background: rgba(255, 219, 112, 1);
+  border-color: rgba(255, 219, 112, 1) rgba(224, 242, 254, 1)
+    rgba(255, 219, 112, 1) rgba(255, 219, 112, 1);
+}

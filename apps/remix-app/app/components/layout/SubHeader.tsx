@@ -8,18 +8,18 @@ export const SubHeader = () => {
 
   return (
     <div className="">
-      <div className="flex flex-col flex-wrap justify-center items-center mx-auto">
+      <div className="flex flex-col flex-wrap justify-end items-center mx-auto">
         <div>
-          <div className="flex flex-wrap grow justify-center">
-            {usersState.map((state, index) => (
-              <UserAvatar
-                key={`${state.id}-${index}`}
-                user={state.name}
-                isMe={username === state.name}
-                state={state.online ? 'online' : 'offline'}
-                showName={true}
-              />
-            ))}
+          <div className="flex flex-wrap grow justify-end scale-75 sm:scale-100">
+            {usersState &&
+              usersState.map((user, index) => (
+                <UserAvatar
+                  key={`${user.id}-${index}`}
+                  user={user.name}
+                  isMe={username === user.name}
+                  state={user.online ? 'online' : 'offline'}
+                />
+              ))}
           </div>
         </div>
       </div>

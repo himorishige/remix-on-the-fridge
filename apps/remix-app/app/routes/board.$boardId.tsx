@@ -1,4 +1,7 @@
 import type { KeyboardEventHandler } from 'react';
+import { useCallback } from 'react';
+import { useRef } from 'react';
+import { Fragment } from 'react';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import type { ActionFunction, LoaderFunction } from '@remix-run/cloudflare';
@@ -17,13 +20,19 @@ import {
   newMessageAtom,
   newTaskAtom,
   usernameAtom,
+  usersListAtom,
   usersStateAtom,
 } from '~/state/store';
 import ReconnectingWebSocket from 'reconnecting-websocket';
+import { Listbox, Transition } from '@headlessui/react';
+import { CheckIcon, SelectorIcon } from '~/components/icons';
+import { FilterIcon } from '~/components/icons/FilterIcon';
 
 export type AddTaskEvent = {
-  message: Message & {
+  message: {
+    name: string;
     assignee: string;
+    message: string;
   };
   event: React.MouseEvent<HTMLButtonElement, MouseEvent>;
 };
@@ -36,7 +45,7 @@ export type CompleteTaskEvent = {
 type LoaderData = {
   loaderCalls: number;
   latestMessages: Message[];
-  latestTasks: Task[];
+  latestTasks?: Task[];
   boardId: string;
   username: string;
   usersState: UserState[];
@@ -152,17 +161,14 @@ export default function Board() {
     loaderCalls,
     boardId,
     latestMessages,
-    latestTasks,
     username,
+    latestTasks = [],
     usersState,
   } = useLoaderData() as LoaderData;
-
-  console.log('---', usersState);
 
   const [newMessages, setNewMessages] = useAtom(newMessageAtom);
   const [newTasks, setNewTasks] = useAtom(newTaskAtom);
   const setUsersState = useUpdateAtom(usersStateAtom);
-  // const [newMessages, setNewMessages] = useState<Message[]>([]);
   const [socket, setSocket] = useState<ReconnectingWebSocket | null>(null);
   const setUsername = useUpdateAtom(usernameAtom);
   const setBoardId = useUpdateAtom(boardIdAtom);
@@ -174,6 +180,8 @@ export default function Board() {
   const [composing, setComposition] = useState(false);
   const startComposition = () => setComposition(true);
   const endComposition = () => setComposition(false);
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // initialize
   useEffect(() => {
@@ -198,21 +206,21 @@ export default function Board() {
 
     let pingPongTimer: any = null;
 
-    const checkConnection = () => {
-      setTimeout(() => {
-        socket.send(JSON.stringify({ ping: 'ping' }));
-        pingPongTimer = setTimeout(() => {
-          console.log('再接続を試みます');
-          pingPongTimer = null;
-          socket.reconnect();
-        }, 1000);
-      }, 30000);
-    };
+    // const checkConnection = () => {
+    //   setTimeout(() => {
+    //     socket.send(JSON.stringify({ ping: 'ping' }));
+    //     pingPongTimer = setTimeout(() => {
+    //       console.log('再接続を試みます');
+    //       pingPongTimer = null;
+    //       socket.reconnect();
+    //     }, 1000);
+    //   }, 30000);
+    // };
 
     socket.addEventListener('open', () => {
       console.log('WebSocket opened');
       socket.send(JSON.stringify({ name: username }));
-      checkConnection();
+      // checkConnection();
     });
 
     socket.addEventListener('message', (event) => {
@@ -235,11 +243,6 @@ export default function Board() {
       } else if (data.task) {
         console.log(data.task);
         setNewTasks((previousValue) => [data.task, ...previousValue]);
-      } else if (data.closeMessage) {
-        console.log(data.closeMessage);
-        setNewMessages((previousValue) => [
-          ...previousValue.filter(({ id }) => id !== data.closeMessage),
-        ]);
       } else if (data.completeTask) {
         console.log(data.completeTask);
         setNewTasks((previousValue) => [
@@ -251,7 +254,7 @@ export default function Board() {
           clearTimeout(pingPongTimer);
           pingPongTimer = null;
         }
-        return checkConnection();
+        // return checkConnection();
       }
     });
 
@@ -262,15 +265,15 @@ export default function Board() {
     boardId,
     username,
     locationKey,
-    usersState,
     setNewMessages,
     setNewTasks,
-    setUsersState,
     setSocket,
     setUsername,
     setBoardId,
     setBoardLoaderCalls,
     loaderCalls,
+    setUsersState,
+    usersState,
   ]);
 
   const keyDownHandler: KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -280,6 +283,7 @@ export default function Board() {
       if (socket) {
         socket.send(JSON.stringify({ message: inputValue }));
         setInputValue('');
+        inputRef.current?.focus();
       }
     }
   };
@@ -292,6 +296,7 @@ export default function Board() {
     if (socket) {
       socket.send(JSON.stringify({ message: inputValue }));
       setInputValue('');
+      inputRef.current?.focus();
     }
   };
 
@@ -305,72 +310,152 @@ export default function Board() {
 
   const completeTaskHandler = (params: CompleteTaskEvent) => {
     params.event.preventDefault();
+    console.log(params.taskId);
 
     if (socket) {
       socket.send(JSON.stringify({ completeTaskId: params.taskId }));
     }
   };
 
+  const [people, setPeople] = useState([
+    { name: 'all' },
+    ...latestTasks.map(({ owner }) => ({ name: owner })),
+    ...newTasks.map(({ owner }) => ({ name: owner })),
+  ]);
+
+  useEffect(() => {
+    setPeople([
+      { name: 'all' },
+      ...latestTasks.map(({ owner }) => ({ name: owner })),
+      ...newTasks.map(({ owner }) => ({ name: owner })),
+    ]);
+  }, [latestTasks, newTasks]);
+
+  const [selected, setSelected] = useState(people[0]);
+
   return (
     <>
-      <div className="bg-sky-300">
-        <div className="container flex items-center py-8 px-4 mx-auto">
-          <div className="pr-2 w-4/5">
-            <Input
-              type="text"
-              name="message"
-              placeholder="Input your message"
-              onKeyDown={keyDownHandler}
-              onCompositionStart={startComposition}
-              onCompositionEnd={endComposition}
-              disabled={!socket}
-              value={inputValue}
-              onChange={(event) => {
-                setInputValue(event.target.value);
-              }}
-            />
+      <main className="grid grid-cols-1 min-h-[calc(100vh_-_88px_-_52px)] bg-sky-100 sm:grid-cols-3">
+        <div className="">
+          <div className="">
+            <div className="flex items-center px-2 pt-4 pb-2 mx-auto">
+              <div className="pr-2 w-4/5">
+                <Input
+                  type="text"
+                  name="message"
+                  ref={inputRef}
+                  placeholder="Input your message"
+                  onKeyDown={keyDownHandler}
+                  onCompositionStart={startComposition}
+                  onCompositionEnd={endComposition}
+                  disabled={!socket}
+                  value={inputValue}
+                  onChange={(event) => {
+                    setInputValue(event.target.value);
+                  }}
+                />
+              </div>
+              <div className="flex justify-end w-1/5">
+                <Button
+                  type="button"
+                  onClick={sendMessageHandler}
+                  disabled={!socket || !inputValue}
+                  full="true"
+                >
+                  Send
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="flex justify-end w-1/5">
-            <Button
-              type="button"
-              onClick={sendMessageHandler}
-              disabled={!socket || !inputValue}
-              full="true"
-            >
-              Add
-            </Button>
+          <div className="grid overflow-auto p-2 h-full max-h-60 sm:max-h-full lg:grid-cols-1">
+            <div className="">
+              {newMessages.map((message) => (
+                <BoardCard
+                  key={`${message.id}`}
+                  message={message}
+                  isMe={username === message.name}
+                  addTaskHandler={addTaskHandler}
+                />
+              ))}
+              {latestMessages.map((message) => (
+                <BoardCard
+                  key={`${message.id}`}
+                  message={message}
+                  isMe={username === message.name}
+                  addTaskHandler={addTaskHandler}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-      <main className="grid grid-cols-2 min-h-[calc(100vh_-_68px_-_52px_-_120px)]">
-        <div className="bg-sky-300">
-          <h2 className="p-2 text-2xl text-center text-white bg-sky-500">
-            Sticky Note
-          </h2>
-          <div className="grid gap-1 p-2 lg:grid-cols-2">
-            {newMessages.map((message) => (
-              <BoardCard
-                key={`${message.id}`}
-                message={message}
-                isMe={username === message.name}
-                addTaskHandler={addTaskHandler}
-              />
-            ))}
-            {latestMessages.map((message) => (
-              <BoardCard
-                key={`${message.id}`}
-                message={message}
-                isMe={username === message.name}
-                addTaskHandler={addTaskHandler}
-              />
-            ))}
+        <div className="col-span-2">
+          <div className="p-2 pt-5">
+            <Listbox value={selected} onChange={setSelected}>
+              <div className="relative">
+                <Listbox.Button className="relative py-2 pr-10 pl-3 w-full text-left bg-white rounded-lg focus-visible:border-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 shadow-md cursor-default sm:text-sm">
+                  <span className="block truncate">
+                    <span className="flex items-center text-gray-700">
+                      <span className="mr-2 text-amber-600">
+                        <FilterIcon />
+                      </span>
+                      {selected.name}
+                    </span>
+                  </span>
+                  <span className="flex absolute inset-y-0 right-0 items-center pr-2 pointer-events-none">
+                    <SelectorIcon
+                      className="w-5 h-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                  </span>
+                </Listbox.Button>
+                <Transition
+                  as={Fragment}
+                  leave="transition ease-in duration-100"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <Listbox.Options className="overflow-auto absolute z-10 py-1 mt-1 w-full max-h-60 text-base bg-white rounded-md focus:outline-none ring-1 ring-black/5 shadow-lg sm:text-sm">
+                    {people.map((person, personIdx) => (
+                      <Listbox.Option
+                        key={personIdx}
+                        className={({ active }) =>
+                          `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                            active
+                              ? 'bg-amber-100 text-amber-900'
+                              : 'text-gray-700'
+                          }`
+                        }
+                        value={person}
+                      >
+                        {() => (
+                          <>
+                            <span
+                              className={`block truncate ${
+                                selected.name === person.name
+                                  ? 'font-medium'
+                                  : 'font-normal'
+                              }`}
+                            >
+                              {person.name}
+                            </span>
+                            {selected.name === person.name ? (
+                              <span className="flex absolute inset-y-0 left-0 items-center pl-3 text-amber-600">
+                                <CheckIcon
+                                  className="w-5 h-5"
+                                  aria-hidden="true"
+                                />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </Transition>
+              </div>
+            </Listbox>
           </div>
-        </div>
-        <div className="bg-sky-400">
-          <h2 className="p-2 text-2xl text-center text-white bg-blue-600">
-            Task
-          </h2>
-          <div className="grid gap-1 p-2 lg:grid-cols-2">
+          <div className="grid gap-2 p-2 sm:grid-cols-2 xl:grid-cols-3">
             {newTasks.map((task) => (
               <TaskCard
                 key={task.id}
@@ -395,7 +480,7 @@ export default function Board() {
 export function CatchBoundary() {
   return (
     <>
-      <main className="flex items-center min-h-[calc(100vh_-_68px_-_52px)] bg-sky-200">
+      <main className="flex items-center min-h-[calc(100vh_-_68px_-_52px)] bg-sky-300">
         <div className="flex flex-col p-8 mx-auto max-w-lg h-full bg-white rounded-lg border border-sky-400 sm:w-4/5">
           <h2 className="mb-3 text-xl font-semibold text-gray-700">
             Choose a Username:

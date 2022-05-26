@@ -19,12 +19,12 @@ export const meta: MetaFunction = ({ data }) => {
 
   return {
     charset: 'utf-8',
-    title: 'Remix on the fridge',
+    title: 'on the fridge powered by Remix',
     viewport: 'width=device-width,initial-scale=1',
-    'og:title': 'Remix on the fridge',
+    'og:title': 'on the fridge powered by Remix',
     'og:url': domain,
     'og:image': `${domain}/ogp-on-the-fridge.png`,
-    'og:site_name': 'Remix on the fridge',
+    'og:site_name': 'on the fridge powered by Remix',
   };
 };
 

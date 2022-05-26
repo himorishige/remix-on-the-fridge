@@ -7,6 +7,8 @@ import * as build from 'remix-app';
 export { default as BoardDurableObject } from 'board-do';
 export { default as CounterDurableObject } from 'counter-do';
 export { default as RateLimiterDurableObject } from 'rate-limiter-do';
+export { default as StickyDurableObject } from 'sticky-do';
+export { default as UserStateDurableObject } from 'user-state-do';
 
 let assetManifest = JSON.parse(manifestJSON);
 let handleRemixRequest = createRequestHandler(build, process.env.NODE_ENV);
