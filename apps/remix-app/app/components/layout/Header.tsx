@@ -26,7 +26,7 @@ export const Header = () => {
   return (
     <>
       <header className="text-white bg-sky-700">
-        <div className="container flex flex-row flex-wrap justify-between items-center py-2 px-4 mx-auto">
+        <div className="flex flex-row flex-wrap justify-between items-center py-2 mx-auto">
           <Link to="/" className="flex items-center font-medium">
             <div className="w-12 h-12">
               <svg
@@ -78,14 +78,14 @@ export const Header = () => {
                 </g>
               </svg>
             </div>
-            <span className="text-3xl hover:underline">
-              Remix on the fridge
+            <span className="text-xl hover:underline sm:text-3xl">
+              on the fridge
             </span>
           </Link>
-          <div className="pr-4 ml-auto">
+          <div className="ml-auto">
             <SubHeader />
           </div>
-          <div className="">
+          <div className="px-2 sm:px-4">
             <button
               type="button"
               className="pt-2 text-lg text-white hover:text-cyan-200 transition-colors duration-200"
