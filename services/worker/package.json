@@ -13,7 +13,9 @@
     "remix-app": "*",
     "counter-do": "*",
     "rate-limiter-do": "*",
-    "board-do": "*"
+    "board-do": "*",
+    "sticky-do": "*",
+    "user-state-do": "*"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^3.10.0",

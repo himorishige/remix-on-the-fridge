@@ -24,6 +24,8 @@ bindings = [
   {name = "COUNTER", class_name = "CounterDurableObject"},
   {name = "BOARD", class_name = "BoardDurableObject"},
   {name = "RATE_LIMITER", class_name = "RateLimiterDurableObject"},
+  {name = "STICKY", class_name = "StickyDurableObject"},
+  {name = "USER_STATE", class_name = "UserStateDurableObject"},
 ]
 
 [durable_objects]
@@ -31,8 +33,14 @@ bindings = [
   {name = "COUNTER", class_name = "CounterDurableObject"},
   {name = "BOARD", class_name = "BoardDurableObject"},
   {name = "RATE_LIMITER", class_name = "RateLimiterDurableObject"},
+  {name = "STICKY", class_name = "StickyDurableObject"},
+  {name = "USER_STATE", class_name = "UserStateDurableObject"},
 ]
 
 [[migrations]]
-new_classes = ["CounterDurableObject", "BoardDurableObject", "RateLimiterDurableObject"]
+new_classes = ["CounterDurableObject", "BoardDurableObject", "RateLimiterDurableObject", "StickyDurableObject", "UserStateDurableObject"]
 tag = "v1"
+
+[[migrations]]
+new_classes = ["StickyDurableObject", "UserStateDurableObject"]
+tag = "v2"
