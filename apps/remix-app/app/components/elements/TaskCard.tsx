@@ -12,22 +12,22 @@ type Props = {
 export const TaskCard: React.FC<Props> = ({ task, completeTaskHandler }) => {
   const isMe = false;
   return (
-    <div className="flex flex-col p-4 h-full text-gray-700 bg-white rounded-lg border border-sky-400">
+    <div className="flex flex-col p-4 h-full text-gray-700 bg-yellow-100 corner_box corner_box_outer">
       <div className="flex items-center mb-4">
         <div className="flex items-center">
           <UserAvatar user={task.owner} isMe={isMe} />
-          <DoubleArrowRight className="w-4 h-4" />
+          <DoubleArrowRight className="w-4 h-4 text-yellow-600" />
           <UserAvatar user={task.assignee} isMe={isMe} />
         </div>
         <div className="flex flex-col grow pl-2">
-          <p className="font-medium">{task.assignee}</p>
+          <p className="text-sm font-medium sm:text-base">{task.assignee}</p>
           <p className="text-xs text-gray-400">
             <IntlDate date={new Date(task.timestamp)} />
           </p>
         </div>
       </div>
       <div>
-        <p className="break-all">{task.title}</p>
+        <p className="text-sm break-all sm:text-base">{task.title}</p>
       </div>
       <div className="flex justify-end items-center pt-4 mt-auto">
         <Button

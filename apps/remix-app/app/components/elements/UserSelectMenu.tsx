@@ -20,7 +20,7 @@ export const UserSelectMenu: React.FC<Props> = ({
     <div className="text-right">
       <Menu as="div" className="inline-block relative text-left">
         <div>
-          <Menu.Button className="inline-flex justify-center py-2 px-4 w-full text-sm font-medium text-white bg-sky-500 hover:bg-sky-700 rounded focus:outline-none">
+          <Menu.Button className="inline-flex justify-center py-2 px-4 w-full text-sm font-medium text-white bg-sky-500 hover:bg-sky-600 rounded focus:outline-none">
             <UserAddIcon className="w-4 h-4" />
             <ArrowDown className="ml-1 w-4 h-4" />
           </Menu.Button>

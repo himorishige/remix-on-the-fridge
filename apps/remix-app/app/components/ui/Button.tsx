@@ -11,11 +11,11 @@ export const Button: React.FC<Props> = (props) => {
     <button
       {...props}
       className={classNames(
-        'font-medium py-2 px-4 text-white bg-blue-500 hover:bg-blue-600 disabled:bg-slate-400 rounded border-0 focus:outline-none flex items-center justify-center',
+        'font-medium py-2 px-4 text-white bg-sky-500 hover:bg-sky-600 disabled:bg-slate-400 rounded border-0 focus:outline-none flex items-center justify-center',
         props.full ? 'w-full' : '',
         props.secondary
           ? 'bg-cyan-500 hover:bg-cyan-600'
-          : 'bg-blue-500 hover:bg-blue-600',
+          : 'bg-sky-500 hover:bg-sky-600',
       )}
     >
       {props.children}

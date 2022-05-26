@@ -11,9 +11,9 @@ type Props = {
 };
 
 const sizes: Record<Size, string> = {
-  small: 'w-8 h-8',
-  medium: 'w-10 h-10',
-  large: 'w-12 h-12',
+  small: 'w-6 h-6',
+  medium: 'w-8 h-8',
+  large: 'w-10 h-10',
 } as const;
 
 export const UserAvatar: React.FC<Props> = ({
@@ -28,7 +28,7 @@ export const UserAvatar: React.FC<Props> = ({
       <div className="flex relative flex-col justify-center items-center">
         {state === 'online' && (
           <>
-            <div className="absolute top-0 right-0">
+            <div className="absolute top-0 -right-1">
               <span className="flex relative w-3 h-3">
                 <span className="inline-flex absolute w-full h-full bg-green-400 rounded-full opacity-75 animate-ping"></span>
                 <span className="inline-flex relative w-3 h-3 bg-green-500 rounded-full"></span>

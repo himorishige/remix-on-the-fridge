@@ -18,7 +18,7 @@ export const BoardCard: React.FC<Props> = ({
   const usersState = useAtomValue(usersStateAtom);
 
   return (
-    <div className="flex flex-row p-2 h-full text-gray-700 bg-white rounded-lg border border-sky-400">
+    <div className="flex flex-row p-2 py-4 text-gray-700 border-t border-sky-400">
       <div className="flex items-start pr-2">
         <UserAvatar user={message.name} isMe={isMe} size="small" />
       </div>
@@ -28,7 +28,7 @@ export const BoardCard: React.FC<Props> = ({
           <div className="flex flex-col">
             <div className="flex flex-col grow">
               <p className="text-xs">{message.name}</p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-500">
                 <IntlDate date={new Date(message.timestamp)} />
               </p>
             </div>
@@ -42,8 +42,8 @@ export const BoardCard: React.FC<Props> = ({
           </div>
         </div>
 
-        <div>
-          <p className="text-sm break-all">{message.message}</p>
+        <div className="pt-2">
+          <p className="text-xs break-all sm:text-sm">{message.message}</p>
         </div>
       </div>
     </div>
