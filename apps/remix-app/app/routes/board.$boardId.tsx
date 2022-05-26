@@ -1,4 +1,5 @@
 import type { KeyboardEventHandler } from 'react';
+import { useCallback } from 'react';
 import { useRef } from 'react';
 import { Fragment } from 'react';
 import { useState } from 'react';
@@ -19,17 +20,19 @@ import {
   newMessageAtom,
   newTaskAtom,
   usernameAtom,
+  usersListAtom,
   usersStateAtom,
 } from '~/state/store';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { Tab, Listbox, Transition } from '@headlessui/react';
-import { classNames } from '~/utils';
+import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, SelectorIcon } from '~/components/icons';
 import { FilterIcon } from '~/components/icons/FilterIcon';
 
 export type AddTaskEvent = {
-  message: Message & {
+  message: {
+    name: string;
     assignee: string;
+    message: string;
   };
   event: React.MouseEvent<HTMLButtonElement, MouseEvent>;
 };
@@ -42,7 +45,7 @@ export type CompleteTaskEvent = {
 type LoaderData = {
   loaderCalls: number;
   latestMessages: Message[];
-  latestTasks: Task[];
+  latestTasks?: Task[];
   boardId: string;
   username: string;
   usersState: UserState[];
@@ -158,17 +161,14 @@ export default function Board() {
     loaderCalls,
     boardId,
     latestMessages,
-    latestTasks,
     username,
+    latestTasks = [],
     usersState,
   } = useLoaderData() as LoaderData;
-
-  console.log('---', usersState);
 
   const [newMessages, setNewMessages] = useAtom(newMessageAtom);
   const [newTasks, setNewTasks] = useAtom(newTaskAtom);
   const setUsersState = useUpdateAtom(usersStateAtom);
-  // const [newMessages, setNewMessages] = useState<Message[]>([]);
   const [socket, setSocket] = useState<ReconnectingWebSocket | null>(null);
   const setUsername = useUpdateAtom(usernameAtom);
   const setBoardId = useUpdateAtom(boardIdAtom);
@@ -206,21 +206,21 @@ export default function Board() {
 
     let pingPongTimer: any = null;
 
-    const checkConnection = () => {
-      setTimeout(() => {
-        socket.send(JSON.stringify({ ping: 'ping' }));
-        pingPongTimer = setTimeout(() => {
-          console.log('再接続を試みます');
-          pingPongTimer = null;
-          socket.reconnect();
-        }, 1000);
-      }, 30000);
-    };
+    // const checkConnection = () => {
+    //   setTimeout(() => {
+    //     socket.send(JSON.stringify({ ping: 'ping' }));
+    //     pingPongTimer = setTimeout(() => {
+    //       console.log('再接続を試みます');
+    //       pingPongTimer = null;
+    //       socket.reconnect();
+    //     }, 1000);
+    //   }, 30000);
+    // };
 
     socket.addEventListener('open', () => {
       console.log('WebSocket opened');
       socket.send(JSON.stringify({ name: username }));
-      checkConnection();
+      // checkConnection();
     });
 
     socket.addEventListener('message', (event) => {
@@ -243,11 +243,6 @@ export default function Board() {
       } else if (data.task) {
         console.log(data.task);
         setNewTasks((previousValue) => [data.task, ...previousValue]);
-      } else if (data.closeMessage) {
-        console.log(data.closeMessage);
-        setNewMessages((previousValue) => [
-          ...previousValue.filter(({ id }) => id !== data.closeMessage),
-        ]);
       } else if (data.completeTask) {
         console.log(data.completeTask);
         setNewTasks((previousValue) => [
@@ -259,7 +254,7 @@ export default function Board() {
           clearTimeout(pingPongTimer);
           pingPongTimer = null;
         }
-        return checkConnection();
+        // return checkConnection();
       }
     });
 
@@ -270,15 +265,15 @@ export default function Board() {
     boardId,
     username,
     locationKey,
-    usersState,
     setNewMessages,
     setNewTasks,
-    setUsersState,
     setSocket,
     setUsername,
     setBoardId,
     setBoardLoaderCalls,
     loaderCalls,
+    setUsersState,
+    usersState,
   ]);
 
   const keyDownHandler: KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -315,15 +310,28 @@ export default function Board() {
 
   const completeTaskHandler = (params: CompleteTaskEvent) => {
     params.event.preventDefault();
+    console.log(params.taskId);
 
     if (socket) {
       socket.send(JSON.stringify({ completeTaskId: params.taskId }));
     }
   };
 
-  const people = usersState.map(({ name }) => ({ name }));
-  const [selected, setSelected] = useState({ name: 'all' });
-  console.log(selected);
+  const [people, setPeople] = useState([
+    { name: 'all' },
+    ...latestTasks.map(({ owner }) => ({ name: owner })),
+    ...newTasks.map(({ owner }) => ({ name: owner })),
+  ]);
+
+  useEffect(() => {
+    setPeople([
+      { name: 'all' },
+      ...latestTasks.map(({ owner }) => ({ name: owner })),
+      ...newTasks.map(({ owner }) => ({ name: owner })),
+    ]);
+  }, [latestTasks, newTasks]);
+
+  const [selected, setSelected] = useState(people[0]);
 
   return (
     <>

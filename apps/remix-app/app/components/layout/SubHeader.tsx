@@ -11,14 +11,15 @@ export const SubHeader = () => {
       <div className="flex flex-col flex-wrap justify-end items-center mx-auto">
         <div>
           <div className="flex flex-wrap grow justify-end scale-75 sm:scale-100">
-            {usersState.map((state, index) => (
-              <UserAvatar
-                key={`${state.id}-${index}`}
-                user={state.name}
-                isMe={username === state.name}
-                state={state.online ? 'online' : 'offline'}
-              />
-            ))}
+            {usersState &&
+              usersState.map((user, index) => (
+                <UserAvatar
+                  key={`${user.id}-${index}`}
+                  user={user.name}
+                  isMe={username === user.name}
+                  state={user.online ? 'online' : 'offline'}
+                />
+              ))}
           </div>
         </div>
       </div>

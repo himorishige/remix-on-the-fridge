@@ -21,8 +21,8 @@ export const UserSelectMenu: React.FC<Props> = ({
       <Menu as="div" className="inline-block relative text-left">
         <div>
           <Menu.Button className="inline-flex justify-center py-2 px-4 w-full text-sm font-medium text-white bg-sky-500 hover:bg-sky-600 rounded focus:outline-none">
-            <UserAddIcon className="w-4 h-4" />
-            <ArrowDown className="ml-1 w-4 h-4" />
+            <UserAddIcon className="w-4 h-4" aria-hidden="true" />
+            <ArrowDown className="ml-1 w-4 h-4" aria-hidden="true" />
           </Menu.Button>
         </div>
         <Transition
@@ -36,29 +36,36 @@ export const UserSelectMenu: React.FC<Props> = ({
         >
           <Menu.Items className="absolute right-0 z-50 mt-2 min-w-[224px] bg-white rounded-md divide-y divide-gray-100 focus:outline-none shadow-lg origin-top-right">
             <div className="p-1 ">
-              {usersState.map((user) => (
-                <Menu.Item key={user.id}>
-                  {({ active }) => (
-                    <button
-                      className={`${
-                        active ? 'bg-sky-500 text-white' : 'text-gray-700'
-                      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                      onClick={(event) =>
-                        addTaskHandler({
-                          message: {
-                            ...message,
-                            assignee: user.name,
-                          },
-                          event,
-                        })
-                      }
-                    >
-                      <UserAvatar user={user.name} size="small" />
-                      <span className="text-sm">{user.name}</span>
-                    </button>
-                  )}
-                </Menu.Item>
-              ))}
+              {usersState &&
+                usersState.map((user) => (
+                  <Menu.Item key={user.id}>
+                    {({ active }) => (
+                      <button
+                        className={`${
+                          active ? 'bg-sky-500 text-white' : 'text-gray-700'
+                        } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                        aria-hidden="true"
+                        onClick={(event) =>
+                          addTaskHandler({
+                            message: {
+                              name: message.name,
+                              message: message.message,
+                              assignee: user.name,
+                            },
+                            event,
+                          })
+                        }
+                      >
+                        <UserAvatar
+                          user={user.name}
+                          size="small"
+                          aria-hidden="true"
+                        />
+                        <span className="text-sm">{user.name}</span>
+                      </button>
+                    )}
+                  </Menu.Item>
+                ))}
             </div>
           </Menu.Items>
         </Transition>

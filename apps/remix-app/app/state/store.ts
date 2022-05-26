@@ -7,3 +7,4 @@ export const usernameAtom = atom<string | null>(null);
 export const newMessageAtom = atom<Message[]>([]);
 export const newTaskAtom = atom<Task[]>([]);
 export const usersStateAtom = atom<UserState[]>([]);
+export const usersListAtom = atom<string[]>([]);
