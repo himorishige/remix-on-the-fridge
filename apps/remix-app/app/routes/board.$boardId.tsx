@@ -196,6 +196,9 @@ export default function Board() {
 
     return () => {
       setUsersState([]);
+      setBoardId(null);
+      setNewMessages([]);
+      setNewTasks([]);
     };
   }, [
     boardId,
