@@ -391,6 +391,11 @@ export default function Board() {
           </div>
           <div className="flex p-2">
             <div className="w-full">
+              {latestMessages.length === 0 && newMessages.length === 0 ? (
+                <div className="text-center">
+                  <p className="text-gray-500">No messages</p>
+                </div>
+              ) : null}
               {newMessages.map((message) => (
                 <BoardCard
                   key={`${message.id}`}
@@ -477,6 +482,11 @@ export default function Board() {
               </div>
             </Listbox>
           </div>
+          {latestTasks.length === 0 && newTasks.length === 0 ? (
+            <div className="p-3 text-center">
+              <p className="text-gray-500">No stickies</p>
+            </div>
+          ) : null}
           <div className="grid gap-2 p-2 sm:grid-cols-2 xl:grid-cols-3">
             {newTasks
               .filter(
