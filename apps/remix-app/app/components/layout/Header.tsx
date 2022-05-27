@@ -82,18 +82,22 @@ export const Header = () => {
               on the fridge
             </span>
           </Link>
-          <div className="ml-auto">
-            <SubHeader />
-          </div>
-          <div className="px-2 sm:px-4">
-            <button
-              type="button"
-              className="pt-2 text-lg text-white hover:text-cyan-200 transition-colors duration-200"
-              onClick={() => setIsOpen(true)}
-            >
-              <ShareIcon className="w-8 h-8" />
-            </button>
-          </div>
+          {boardId && (
+            <>
+              <div className="ml-auto">
+                <SubHeader />
+              </div>
+              <div className="px-2 sm:px-4">
+                <button
+                  type="button"
+                  className="pt-2 text-lg text-white hover:text-cyan-200 transition-colors duration-200"
+                  onClick={() => setIsOpen(true)}
+                >
+                  <ShareIcon className="w-8 h-8" />
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </header>
       <Dialog
