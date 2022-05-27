@@ -2,7 +2,7 @@ import type { Task } from 'board-do';
 import { Button } from '~/components/ui';
 import { IntlDate, UserAvatar } from '~/components/elements';
 import { CheckIcon, DoubleArrowRight } from '~/components/icons';
-import type { CompleteTaskEvent } from '~/routes/board.$boardId';
+import type { CompleteTaskEvent } from '~/components/layout/StickyArea';
 
 type Props = {
   task: Task;

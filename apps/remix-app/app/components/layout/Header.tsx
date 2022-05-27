@@ -3,13 +3,22 @@ import { ShareIcon } from '~/components/icons';
 import { useAtomValue } from 'jotai';
 import { boardIdAtom } from '~/state/store';
 import { Dialog } from '@headlessui/react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Button } from '~/components/ui';
 import { SubHeader } from './SubHeader';
+import toast, { Toaster } from 'react-hot-toast';
 
 export const Header = () => {
   const boardId = useAtomValue(boardIdAtom);
-  let [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const notify = useCallback(
+    (message: string) =>
+      toast.success(message, {
+        position: 'bottom-center',
+      }),
+    [],
+  );
 
   const shareHandler: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
@@ -19,7 +28,7 @@ export const Header = () => {
     if (!boardId || !boardUrl) return;
 
     window.navigator.clipboard.writeText(boardUrl).then(() => {
-      alert('Copied to clipboard!');
+      notify('Copied to clipboard!');
     });
   };
 
@@ -128,6 +137,7 @@ export const Header = () => {
           </Dialog.Panel>
         </div>
       </Dialog>
+      <Toaster />
     </>
   );
 };

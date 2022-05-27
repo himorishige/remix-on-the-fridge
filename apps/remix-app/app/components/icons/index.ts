@@ -4,3 +4,4 @@ export * from './ShareIcon';
 export * from './ArrowDown';
 export * from './DoubleArrowRight';
 export * from './SelectorIcon';
+export * from './FilterIcon';
