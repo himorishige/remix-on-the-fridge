@@ -183,13 +183,8 @@ export default function Board() {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // initialize
   useEffect(() => {
-    const hostname = window.location.host;
-    if (!hostname) return;
-
-    console.log('init');
-
+    console.log('Board mounted');
     // store global state(Jotai)
     setUsername(username);
     setBoardId(boardId);
@@ -197,6 +192,26 @@ export default function Board() {
     setNewMessages([]);
     setNewTasks([]);
     setUsersState(usersState);
+    inputRef.current?.focus();
+  }, [
+    boardId,
+    loaderCalls,
+    setBoardId,
+    setBoardLoaderCalls,
+    setNewMessages,
+    setNewTasks,
+    setUsername,
+    setUsersState,
+    username,
+    usersState,
+  ]);
+
+  // initialize
+  useEffect(() => {
+    const hostname = window.location.host;
+    if (!hostname) return;
+
+    console.log('init');
 
     const socket = new ReconnectingWebSocket(
       `${
@@ -263,17 +278,11 @@ export default function Board() {
     };
   }, [
     boardId,
-    username,
-    locationKey,
     setNewMessages,
     setNewTasks,
-    setSocket,
-    setUsername,
-    setBoardId,
-    setBoardLoaderCalls,
-    loaderCalls,
     setUsersState,
-    usersState,
+    username,
+    locationKey,
   ]);
 
   const keyDownHandler: KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -324,6 +333,7 @@ export default function Board() {
   ]);
 
   useEffect(() => {
+    inputRef.current?.focus();
     setPeople([
       { name: 'all' },
       ...latestTasks.map(({ owner }) => ({ name: owner })),
@@ -335,8 +345,8 @@ export default function Board() {
 
   return (
     <>
-      <main className="grid grid-cols-1 min-h-[calc(100vh_-_88px_-_52px)] bg-sky-100 sm:grid-cols-3">
-        <div className="">
+      <main className="grid grid-cols-1 min-h-[calc(100vh_-_64px_-_52px)] bg-sky-100 sm:grid-cols-3">
+        <div className="lg:grid-cols-1">
           <div className="">
             <div className="flex items-center px-2 pt-4 pb-2 mx-auto">
               <div className="pr-2 w-4/5">
@@ -367,8 +377,8 @@ export default function Board() {
               </div>
             </div>
           </div>
-          <div className="grid overflow-auto p-2 h-full max-h-60 sm:max-h-full lg:grid-cols-1">
-            <div className="">
+          <div className="flex p-2">
+            <div className="w-full">
               {newMessages.map((message) => (
                 <BoardCard
                   key={`${message.id}`}
@@ -456,20 +466,30 @@ export default function Board() {
             </Listbox>
           </div>
           <div className="grid gap-2 p-2 sm:grid-cols-2 xl:grid-cols-3">
-            {newTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                completeTaskHandler={completeTaskHandler}
-              />
-            ))}
-            {latestTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                completeTaskHandler={completeTaskHandler}
-              />
-            ))}
+            {newTasks
+              .filter(
+                (task) =>
+                  task.owner === selected.name || selected.name === 'all',
+              )
+              .map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  completeTaskHandler={completeTaskHandler}
+                />
+              ))}
+            {latestTasks
+              .filter(
+                (task) =>
+                  task.owner === selected.name || selected.name === 'all',
+              )
+              .map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  completeTaskHandler={completeTaskHandler}
+                />
+              ))}
           </div>
         </div>
       </main>
