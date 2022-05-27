@@ -33,32 +33,22 @@ export type UserState = {
 export default class BoardDurableObject {
   private sessions: Session[] = [];
   private lastTimestamp: number = 0;
-  private usersState: UserState[] = [];
-  private tasks: Task[] = [];
-  private boardId: string = '';
 
-  constructor(private state: DurableObjectState, private env: Env) {
-    this.state.blockConcurrencyWhile(async () => {
-      const storedTasksValue = await this.state.storage.get<Task[]>('tasks');
-      this.tasks = storedTasksValue || [];
-
-      this.boardId = this.state.id.toString();
-    });
-  }
+  constructor(private state: DurableObjectState, private env: Env) {}
 
   async fetch(request: Request) {
     return handleErrors(request, async () => {
       const url = new URL(request.url);
 
       if (url.pathname === '/latest') {
+        //
         const data = await this.state.storage.list<Message>({
           reverse: true,
           limit: 100,
         });
         const messages = [...data.values()];
-        console.log(messages);
-
         return new Response(JSON.stringify(messages));
+        //
       } else if (url.pathname === '/tasks') {
         //
         const stickyId = this.env.STICKY.idFromName(this.state.id.toString());
@@ -163,7 +153,7 @@ export default class BoardDurableObject {
 
         // I guess we'll use JSON.
         let data = JSON.parse(msg.data);
-        console.log('msg data', data);
+        // console.log('msg data', data);
 
         if (!receivedUserInfo) {
           // The first message the client sends is the user info message with their name. Save it
@@ -200,35 +190,6 @@ export default class BoardDurableObject {
             headers: { 'Content-Type': 'application/json' },
           });
 
-          // Save UserState for this user.
-
-          // if (
-          //   this.usersState.filter((user) => user.name === session.name)
-          //     .length === 0
-          // ) {
-          //   const sessionData: UserState = {
-          //     id: uuid(),
-          //     name: session.name || 'anonymous',
-          //     online: true,
-          //   };
-          //   this.usersState = [...this.usersState, sessionData];
-          //   await this.state.storage.put('usersState', [
-          //     ...this.usersState,
-          //     sessionData,
-          //   ]);
-          // } else {
-          //   this.usersState = this.usersState.map((user) => {
-          //     if (user.name === session.name) {
-          //       return {
-          //         ...user,
-          //         online: true,
-          //       };
-          //     }
-          //     return user;
-          //   });
-          //   await this.state.storage.put('usersState', this.usersState);
-          // }
-
           // Broadcast to all other connections that this user has joined.
           this.broadcast({
             joined: session.name,
@@ -245,7 +206,7 @@ export default class BoardDurableObject {
           return;
         }
 
-        console.log('receiveData', data);
+        // console.log('receiveData', data);
 
         // message sequence
         if ('message' in data) {
@@ -332,21 +293,6 @@ export default class BoardDurableObject {
     const closeOrErrorHandler = async () => {
       session.quit = true;
       this.sessions = this.sessions.filter((member) => member !== session);
-
-      // Update usersState
-
-      // const usersState = [
-      //   ...this.usersState.map((state) => {
-      //     if (state.name === session.name) {
-      //       return {
-      //         ...state,
-      //         online: false,
-      //       };
-      //     }
-      //     return state;
-      //   }),
-      // ];
-      // await this.state.storage.put('usersState', usersState);
 
       if (session.name) {
         const userStateId = this.env.USER_STATE.idFromName(

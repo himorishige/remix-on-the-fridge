@@ -4,14 +4,7 @@ export type UserState = {
   online: boolean;
 };
 export default class UserStateDurableObject {
-  private usersState: UserState[] = [];
-
-  constructor(private state: DurableObjectState) {
-    this.state.blockConcurrencyWhile(async () => {
-      let storedValue = await this.state.storage.list<UserState>();
-      this.usersState = [...storedValue.values()] || [];
-    });
-  }
+  constructor(private state: DurableObjectState) {}
 
   async fetch(request: Request) {
     const url = new URL(request.url);

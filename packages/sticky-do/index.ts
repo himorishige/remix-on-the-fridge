@@ -8,14 +8,7 @@ export interface Task {
 }
 
 export default class StickyDurableObject {
-  private tasks: Task[] = [];
-
-  constructor(private state: DurableObjectState) {
-    this.state.blockConcurrencyWhile(async () => {
-      let storedValue = await this.state.storage.list<Task>();
-      this.tasks = [...storedValue.values()] || [];
-    });
-  }
+  constructor(private state: DurableObjectState) {}
 
   async fetch(request: Request) {
     const url = new URL(request.url);
