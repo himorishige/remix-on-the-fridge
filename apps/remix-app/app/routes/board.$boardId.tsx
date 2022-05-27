@@ -193,6 +193,10 @@ export default function Board() {
     setNewTasks([]);
     setUsersState(usersState);
     inputRef.current?.focus();
+
+    return () => {
+      setUsersState([]);
+    };
   }, [
     boardId,
     loaderCalls,
@@ -219,23 +223,24 @@ export default function Board() {
       }://${hostname}/board/${boardId}/websocket`,
     );
 
+    let reconnectTimer: any = null;
     let pingPongTimer: any = null;
 
-    // const checkConnection = () => {
-    //   setTimeout(() => {
-    //     socket.send(JSON.stringify({ ping: 'ping' }));
-    //     pingPongTimer = setTimeout(() => {
-    //       console.log('再接続を試みます');
-    //       pingPongTimer = null;
-    //       socket.reconnect();
-    //     }, 1000);
-    //   }, 30000);
-    // };
+    const checkConnection = () => {
+      reconnectTimer = setTimeout(() => {
+        socket.send(JSON.stringify({ ping: 'ping' }));
+        pingPongTimer = setTimeout(() => {
+          console.log('try to reconnect...');
+          pingPongTimer = null;
+          socket.reconnect();
+        }, 1000);
+      }, 30000);
+    };
 
     socket.addEventListener('open', () => {
       console.log('WebSocket opened');
       socket.send(JSON.stringify({ name: username }));
-      // checkConnection();
+      checkConnection();
     });
 
     socket.addEventListener('message', (event) => {
@@ -269,11 +274,15 @@ export default function Board() {
           clearTimeout(pingPongTimer);
           pingPongTimer = null;
         }
-        // return checkConnection();
+        return checkConnection();
       }
     });
 
     return () => {
+      console.log('Board unmounted');
+
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
       socket.close();
     };
   }, [
@@ -327,18 +336,21 @@ export default function Board() {
   };
 
   const [people, setPeople] = useState([
-    { name: 'all' },
-    ...latestTasks.map(({ owner }) => ({ name: owner })),
-    ...newTasks.map(({ owner }) => ({ name: owner })),
+    'all',
+    ...latestTasks.map(({ assignee }) => assignee),
+    ...newTasks.map(({ assignee }) => assignee),
   ]);
 
   useEffect(() => {
     inputRef.current?.focus();
-    setPeople([
-      { name: 'all' },
-      ...latestTasks.map(({ owner }) => ({ name: owner })),
-      ...newTasks.map(({ owner }) => ({ name: owner })),
-    ]);
+    const target = [
+      'all',
+      ...latestTasks.map(({ assignee }) => assignee),
+      ...newTasks.map(({ assignee }) => assignee),
+    ];
+    const result = [...new Set(target)];
+
+    setPeople(result);
   }, [latestTasks, newTasks]);
 
   const [selected, setSelected] = useState(people[0]);
@@ -408,7 +420,7 @@ export default function Board() {
                       <span className="mr-2 text-amber-600">
                         <FilterIcon />
                       </span>
-                      {selected.name}
+                      {selected}
                     </span>
                   </span>
                   <span className="flex absolute inset-y-0 right-0 items-center pr-2 pointer-events-none">
@@ -441,14 +453,14 @@ export default function Board() {
                           <>
                             <span
                               className={`block truncate ${
-                                selected.name === person.name
+                                selected === person
                                   ? 'font-medium'
                                   : 'font-normal'
                               }`}
                             >
-                              {person.name}
+                              {person}
                             </span>
-                            {selected.name === person.name ? (
+                            {selected === person ? (
                               <span className="flex absolute inset-y-0 left-0 items-center pl-3 text-amber-600">
                                 <CheckIcon
                                   className="w-5 h-5"
@@ -468,8 +480,7 @@ export default function Board() {
           <div className="grid gap-2 p-2 sm:grid-cols-2 xl:grid-cols-3">
             {newTasks
               .filter(
-                (task) =>
-                  task.owner === selected.name || selected.name === 'all',
+                (task) => task.assignee === selected || selected === 'all',
               )
               .map((task) => (
                 <TaskCard
@@ -480,8 +491,7 @@ export default function Board() {
               ))}
             {latestTasks
               .filter(
-                (task) =>
-                  task.owner === selected.name || selected.name === 'all',
+                (task) => task.assignee === selected || selected === 'all',
               )
               .map((task) => (
                 <TaskCard
