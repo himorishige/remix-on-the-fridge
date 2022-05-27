@@ -15,15 +15,13 @@ import { Footer, Header } from '~/components/layout';
 import styles from '~/styles/app.css';
 
 export const meta: MetaFunction = ({ data }) => {
-  const { domain } = data as LoaderData;
-
   return {
     charset: 'utf-8',
     title: 'on the fridge powered by Remix',
     viewport: 'width=device-width,initial-scale=1',
     'og:title': 'on the fridge powered by Remix',
-    'og:url': domain,
-    'og:image': `${domain}/ogp-on-the-fridge.png`,
+    'og:url': data?.domain,
+    'og:image': `${data?.domain}/ogp-on-the-fridge.png`,
     'og:site_name': 'on the fridge powered by Remix',
   };
 };
