@@ -10,4 +10,5 @@ interface Env {
   USER_STATE: DurableObjectNamespace;
 
   SESSION_SECRET: string;
+  ENVIRONMENT: string;
 }
