@@ -1,7 +1,7 @@
 import { Menu, Transition } from '@headlessui/react';
 import type { Message, UserState } from 'board-do';
 import { Fragment } from 'react';
-import type { AddTaskEvent } from '~/routes/board.$boardId';
+import type { AddTaskEvent } from '~/components/layout/MessageArea';
 import { ArrowDown, UserAddIcon } from '~/components/icons';
 import { UserAvatar } from './UserAvatar';
 

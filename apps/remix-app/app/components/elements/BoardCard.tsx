@@ -2,7 +2,7 @@ import type { Message } from 'board-do';
 import { useAtomValue } from 'jotai';
 import { usersStateAtom } from '~/state/store';
 import { IntlDate, UserSelectMenu, UserAvatar } from '~/components/elements';
-import type { AddTaskEvent } from '~/routes/board.$boardId';
+import type { AddTaskEvent } from '~/components/layout/MessageArea';
 
 type Props = {
   message: Message;

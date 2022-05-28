@@ -3,8 +3,10 @@ import React from 'react';
 
 type Props = Omit<ComponentPropsWithRef<'input'>, 'className'>;
 
-// eslint-disable-next-line react/display-name
-export const Input: React.FC<Props> = React.forwardRef((props, ref) => {
+export const Input: React.FC<Props> = React.forwardRef(function Input(
+  props,
+  ref,
+) {
   return (
     <input
       ref={ref}

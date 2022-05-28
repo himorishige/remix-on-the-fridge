@@ -15,15 +15,13 @@ import { Footer, Header } from '~/components/layout';
 import styles from '~/styles/app.css';
 
 export const meta: MetaFunction = ({ data }) => {
-  const { domain } = data as LoaderData;
-
   return {
     charset: 'utf-8',
     title: 'on the fridge powered by Remix',
     viewport: 'width=device-width,initial-scale=1',
     'og:title': 'on the fridge powered by Remix',
-    'og:url': domain,
-    'og:image': `${domain}/ogp-on-the-fridge.png`,
+    'og:url': data?.domain,
+    'og:image': `${data?.domain}/ogp-on-the-fridge.png`,
     'og:site_name': 'on the fridge powered by Remix',
   };
 };
@@ -94,9 +92,9 @@ export const CatchBoundary = () => {
 
   return (
     <Document>
-      <main>
-        <h1>{status}</h1>
-        {statusText && <p>{statusText}</p>}
+      <main className="flex flex-col justify-center items-center min-h-[calc(100vh_-_68px_-_52px)] text-sky-700 bg-sky-100">
+        <h1 className="text-3xl">{status}</h1>
+        {statusText && <p className="text-xl">{statusText}</p>}
       </main>
     </Document>
   );
@@ -107,8 +105,8 @@ export const ErrorBoundary = ({ error }: { error: Error }) => {
 
   return (
     <Document>
-      <main>
-        <h1>Oops, looks like something went wrong 😭</h1>
+      <main className="flex flex-col justify-center items-center min-h-[calc(100vh_-_68px_-_52px)] text-sky-700 bg-sky-100">
+        <h1 className="text-3xl">Oops, looks like something went wrong 😭</h1>
       </main>
     </Document>
   );

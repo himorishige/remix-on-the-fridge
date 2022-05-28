@@ -3,13 +3,22 @@ import { ShareIcon } from '~/components/icons';
 import { useAtomValue } from 'jotai';
 import { boardIdAtom } from '~/state/store';
 import { Dialog } from '@headlessui/react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Button } from '~/components/ui';
 import { SubHeader } from './SubHeader';
+import toast, { Toaster } from 'react-hot-toast';
 
 export const Header = () => {
   const boardId = useAtomValue(boardIdAtom);
-  let [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const notify = useCallback(
+    (message: string) =>
+      toast.success(message, {
+        position: 'bottom-center',
+      }),
+    [],
+  );
 
   const shareHandler: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
@@ -19,7 +28,7 @@ export const Header = () => {
     if (!boardId || !boardUrl) return;
 
     window.navigator.clipboard.writeText(boardUrl).then(() => {
-      alert('Copied to clipboard!');
+      notify('Copied to clipboard!');
     });
   };
 
@@ -82,18 +91,22 @@ export const Header = () => {
               on the fridge
             </span>
           </Link>
-          <div className="ml-auto">
-            <SubHeader />
-          </div>
-          <div className="px-2 sm:px-4">
-            <button
-              type="button"
-              className="pt-2 text-lg text-white hover:text-cyan-200 transition-colors duration-200"
-              onClick={() => setIsOpen(true)}
-            >
-              <ShareIcon className="w-8 h-8" />
-            </button>
-          </div>
+          {boardId && (
+            <>
+              <div className="ml-auto">
+                <SubHeader />
+              </div>
+              <div className="px-2 sm:px-4">
+                <button
+                  type="button"
+                  className="pt-2 text-lg text-white hover:text-cyan-200 transition-colors duration-200"
+                  onClick={() => setIsOpen(true)}
+                >
+                  <ShareIcon className="w-8 h-8" />
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </header>
       <Dialog
@@ -124,6 +137,7 @@ export const Header = () => {
           </Dialog.Panel>
         </div>
       </Dialog>
+      <Toaster />
     </>
   );
 };
