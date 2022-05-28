@@ -19,10 +19,11 @@ export type CompleteTaskEvent = {
 
 export const StickyArea: React.FC<Props> = ({ socket, latestTasks }) => {
   const newTasks = useAtomValue(newTaskAtom);
+  const [latestTasksStore, setLatestTasksStore] = useState(latestTasks);
 
   const [people, setPeople] = useState([
     'all',
-    ...latestTasks.map(({ assignee }) => assignee),
+    ...latestTasksStore.map(({ assignee }) => assignee),
     ...newTasks.map(({ assignee }) => assignee),
   ]);
   const [selected, setSelected] = useState(people[0]);
@@ -30,6 +31,12 @@ export const StickyArea: React.FC<Props> = ({ socket, latestTasks }) => {
   const completeTaskHandler = (params: CompleteTaskEvent) => {
     params.event.preventDefault();
     console.log(params.taskId);
+
+    if (latestTasksStore.some(({ id }) => id === params.taskId)) {
+      setLatestTasksStore((previousArray) =>
+        previousArray.filter(({ id }) => id !== params.taskId),
+      );
+    }
 
     if (socket) {
       socket.send(JSON.stringify({ completeTaskId: params.taskId }));
@@ -39,13 +46,13 @@ export const StickyArea: React.FC<Props> = ({ socket, latestTasks }) => {
   useEffect(() => {
     const target = [
       'all',
-      ...latestTasks.map(({ assignee }) => assignee),
+      ...latestTasksStore.map(({ assignee }) => assignee),
       ...newTasks.map(({ assignee }) => assignee),
     ];
     const result = [...new Set(target)];
 
     setPeople(result);
-  }, [latestTasks, newTasks]);
+  }, [latestTasksStore, newTasks]);
 
   return (
     <>
@@ -123,7 +130,7 @@ export const StickyArea: React.FC<Props> = ({ socket, latestTasks }) => {
               completeTaskHandler={completeTaskHandler}
             />
           ))}
-        {latestTasks
+        {latestTasksStore
           .filter((task) => task.assignee === selected || selected === 'all')
           .map((task) => (
             <TaskCard
