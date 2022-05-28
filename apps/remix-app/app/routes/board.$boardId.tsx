@@ -262,6 +262,7 @@ export default function Board() {
     setUsersState,
     username,
     locationKey,
+    notify,
   ]);
 
   return (

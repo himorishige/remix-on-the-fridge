@@ -1,5 +1,6 @@
 import type { ActionFunction } from '@remix-run/cloudflare';
 import { redirect } from '@remix-run/cloudflare';
+import { uuid } from '@cfworker/uuid';
 
 import { commitSession, getSession } from '~/session.server';
 
@@ -17,7 +18,10 @@ export const action: ActionFunction = async ({ context: { env }, request }) => {
     const id = env.BOARD.newUniqueId().toString();
 
     const session = await sessionPromise;
+    const userId = session.get('userId') || uuid();
+
     session.set('username', username);
+    session.set('userId', userId);
 
     return redirect(`/board/${id}`, {
       headers: {

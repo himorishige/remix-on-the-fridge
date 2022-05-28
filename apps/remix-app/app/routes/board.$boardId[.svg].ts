@@ -13,6 +13,15 @@ export const loader: LoaderFunction = async ({
     return new Response('Invalid board url', { status: 400 });
   }
 
+  // @ts-ignore
+  // const cache = caches.default;
+  // const cachedResponse = await cache.match(request);
+  // console.log('res', cachedResponse);
+
+  // if (cachedResponse != null) {
+  //   return cachedResponse;
+  // }
+
   const board = env.BOARD.get(env.BOARD.idFromString(boardId));
 
   if (!board) {
@@ -37,6 +46,8 @@ export const loader: LoaderFunction = async ({
       'Cache-Control': `max-age: ${MAXAGE}, s-maxage: ${S_MAXAGE}`,
     },
   });
+
+  // cache.put(request, response.clone());
 
   return response;
 };
