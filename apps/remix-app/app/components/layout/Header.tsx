@@ -89,7 +89,7 @@ export const Header = () => {
                 </svg>
               </div>
               <span className="text-xl hover:underline sm:text-3xl">
-                on the fridge
+                sticky notes on the fridge
               </span>
             </Link>
             <div className="ml-2">

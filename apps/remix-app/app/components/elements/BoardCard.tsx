@@ -18,7 +18,7 @@ export const BoardCard: React.FC<Props> = ({
   const usersState = useAtomValue(usersStateAtom);
 
   return (
-    <div className="flex flex-row p-2 py-4 text-gray-700 border-t border-sky-400">
+    <div className="flex flex-row p-2 py-4 pr-0 text-gray-700 border-t border-sky-400">
       <div className="flex items-start pr-2">
         <UserAvatar user={message.name} isMe={isMe} size="small" />
       </div>
