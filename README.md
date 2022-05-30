@@ -1,40 +1,49 @@
-# Turborepo starter with npm
+# Stick notes on the fridge
 
-This is an official starter turborepo.
+This is an application that imagines writing notes on sticky notes on refrigerator doors.  
+In Japan, many people leave notes on their refrigerators about what they need for shopping or school, and stick them on the refrigerator.
+
+You can consult with family members or friends via chat, assign a person to be in charge, and record the information as a sticky note. You can also filter who is in charge to make it easier to see your tasks. The people who can be assigned are either yourself or people who are online.
+
+## Quick Start
+
+1. First, create a new private board.
+2. Choose your own username and log in.
+3. Copy the QR code or URL from the share icon and send it to the people you want to share it with.
+4. Make a note of the board URL so you don't forget it.
 
 ## What's inside?
 
-This turborepo uses [npm](https://www.npmjs.com/) as a package manager. It includes the following packages/apps:
+This turborepo uses Yarn as a package manager. It includes the following packages/apps/services:
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org) app
-- `web`: another [Next.js](https://nextjs.org) app
-- `ui`: a stub React component library shared by both `web` and `docs` applications
-- `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `tsconfig`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+- `apps/remix-app`: [Remix](https://remix.run) app
+- `services/worker`: Worker
+- `packages/board-do`: DO that implements a websocket interface to place and manage messages and sticky notes
+- `packages/sticky-do`: DO to manage sticky notes
+- `packages/user-state-do`: DO to manage users online state
+- `packages/rate-limiter-do`: DO to manage rate limiter
+- `packages/counter-do`: DO to manage counter state
+- `packages/cloudflare-config`: worker configurations
+- `packages/tsconfig`: `tsconfig.json`s used throughout the monorepo
+- `packages/eslint-config-custom`: `eslint` configurations
 
 ## Setup
 
-This repository is used in the `npx create-turbo@latest` command, and selected when choosing which package manager you wish to use with your monorepo (npm).
+This repository uses turborepo, and selected when choosing which package manager you wish to use with your monorepo (yarn).
+
+```
+yarn install
+```
 
 ### Build
 
 To build all apps and packages, run the following command:
 
 ```
-cd my-turborepo
-npm run build
+cd on-the-fridge
+yarn build
 ```
 
 ### Develop
@@ -42,36 +51,12 @@ npm run build
 To develop all apps and packages, run the following command:
 
 ```
-cd my-turborepo
-npm run dev
+cd on-the-fridge
+yarn dev
 ```
 
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching (Beta)](https://turborepo.org/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching (Beta) you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
+### Deploy
 
 ```
-cd my-turborepo
-npx turbo login
+yarn deploy
 ```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Pipelines](https://turborepo.org/docs/core-concepts/pipelines)
-- [Caching](https://turborepo.org/docs/core-concepts/caching)
-- [Remote Caching (Beta)](https://turborepo.org/docs/core-concepts/remote-caching)
-- [Scoped Tasks](https://turborepo.org/docs/core-concepts/scopes)
-- [Configuration Options](https://turborepo.org/docs/reference/configuration)
-- [CLI Usage](https://turborepo.org/docs/reference/command-line-reference)
