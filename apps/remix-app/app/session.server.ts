@@ -8,8 +8,7 @@ const getSessionStorage = (env: Env) => {
     cookie: {
       httpOnly: true,
       name: 'remix-on-the-fridge',
-      expires: new Date(Date.now() + 60_000 * 60),
-      maxAge: 60 * 60,
+      maxAge: 2_592_000, // 30 days
       path: '/',
       sameSite: 'lax',
       secrets: [env.SESSION_SECRET],
