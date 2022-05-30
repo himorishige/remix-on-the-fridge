@@ -24,6 +24,6 @@
 }
 .corner_box_outer:before {
   background: rgba(255, 219, 112, 1);
-  border-color: rgba(255, 219, 112, 1) rgba(224, 242, 254, 1)
+  border-color: rgba(255, 219, 112, 1) rgba(186, 230, 253, 1)
     rgba(255, 219, 112, 1) rgba(255, 219, 112, 1);
 }

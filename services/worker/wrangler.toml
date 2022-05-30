@@ -10,16 +10,17 @@ kv_namespaces = [
   { binding = "SESSION_KV", id = "3fa3ff56bb454b30878a5c7034869cf9", preview_id = "a1a2a6017f7f4c2485258ece761ca0c0" },
 ]
 
-vars = {ENVIRONMENT = "production"}
+[vars]
+ENVIRONMENT = "production"
 
 [site]
 bucket = "../../apps/remix-app/public"
 
+[env.dev.vars]
+SESSION_SECRET = "should-be-secure-in-prod"
+ENVIRONMENT = "development"
+
 [env.dev]
-vars = [
-  {SESSION_SECRET = "should-be-secure-in-prod"},
-  {ENVIRONMENT = "development"}
-]
 kv_namespaces = [
   { binding = "SESSION_KV", id = "3fa3ff56bb454b30878a5c7034869cf9", preview_id = "a1a2a6017f7f4c2485258ece761ca0c0" },
 ]

@@ -267,17 +267,19 @@ export default function Board() {
 
   return (
     <>
-      <main className="grid grid-cols-1 min-h-[calc(100vh_-_64px_-_52px)] bg-sky-100 sm:grid-cols-3">
-        <MessageArea
-          latestMessages={latestMessages}
-          username={username}
-          socket={socket}
-        />
-        <div className="col-span-2">
-          <StickyArea latestTasks={latestTasks} socket={socket} />
-        </div>
-      </main>
-      <Toaster />
+      <div className="p-2 bg-sky-700">
+        <main className="grid grid-cols-1 min-h-[calc(100vh_-_64px_-_68px)] bg-sky-200 rounded-lg sm:grid-cols-3">
+          <MessageArea
+            latestMessages={latestMessages}
+            username={username}
+            socket={socket}
+          />
+          <div className="col-span-2">
+            <StickyArea latestTasks={latestTasks} socket={socket} />
+          </div>
+        </main>
+        <Toaster />
+      </div>
     </>
   );
 }
@@ -285,7 +287,7 @@ export default function Board() {
 export function CatchBoundary() {
   return (
     <>
-      <main className="flex items-center min-h-[calc(100vh_-_68px_-_52px)] bg-sky-300">
+      <main className="flex items-center min-h-[calc(100vh_-_68px_-_52px)] bg-sky-200">
         <div className="flex flex-col p-8 mx-auto max-w-lg h-full bg-white rounded-lg border border-sky-400 sm:w-4/5">
           <h2 className="mb-3 text-xl font-semibold text-gray-700">
             Choose a Username:
