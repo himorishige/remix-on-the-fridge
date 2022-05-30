@@ -92,10 +92,12 @@ export const CatchBoundary = () => {
 
   return (
     <Document>
-      <main className="flex flex-col justify-center items-center min-h-[calc(100vh_-_68px_-_52px)] text-sky-700 bg-sky-100">
-        <h1 className="text-3xl">{status}</h1>
-        {statusText && <p className="text-xl">{statusText}</p>}
-      </main>
+      <div className="p-2 bg-sky-700">
+        <main className="flex flex-col justify-center items-center min-h-[calc(100vh_-_68px_-_64px)] text-sky-700 bg-sky-200 rounded-lg">
+          <h1 className="text-3xl">{status}</h1>
+          {statusText && <p className="text-xl">{statusText}</p>}
+        </main>
+      </div>
     </Document>
   );
 };
@@ -105,9 +107,11 @@ export const ErrorBoundary = ({ error }: { error: Error }) => {
 
   return (
     <Document>
-      <main className="flex flex-col justify-center items-center min-h-[calc(100vh_-_68px_-_52px)] text-sky-700 bg-sky-100">
-        <h1 className="text-3xl">Oops, looks like something went wrong 😭</h1>
-      </main>
+      <div className="p-2 bg-sky-700">
+        <main className="flex flex-col justify-center items-center min-h-[calc(100vh_-_68px_-_64px)] text-sky-700 bg-sky-200 rounded-lg">
+          <h1 className="text-3xl">Oops, looks like something went wrong 😭</h1>
+        </main>
+      </div>
     </Document>
   );
 };

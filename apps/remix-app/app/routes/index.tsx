@@ -29,33 +29,34 @@ export default function Index() {
   const { username } = useLoaderData() as LoaderData;
 
   return (
-    <main className="flex items-center min-h-[calc(100vh_-_66px_-_52px)] bg-sky-300">
-      <div className="flex flex-col p-8 mx-auto max-w-lg h-full bg-white rounded-lg border border-sky-400 sm:w-4/5">
-        <h2 className="mb-3 text-xl font-semibold text-gray-700">
-          Choose a Username:
-        </h2>
-        <Form method="post" id="username-form">
-          <Input
-            name="username"
-            placeholder="Choose a Username"
-            required
-            maxLength={32}
-            defaultValue={username}
-          />
-          <button disabled type="submit" style={{ display: 'none' }} />
-        </Form>
-        <div className="mt-4">
-          <Button
-            type="submit"
-            form="username-form"
-            formAction="/new"
-            full="true"
-          >
-            Create a Private Board
-          </Button>
+    <div className="p-2 bg-sky-700">
+      <main className="flex items-center min-h-[calc(100vh_-_66px_-_66px)] bg-sky-200 rounded-lg">
+        <div className="flex flex-col p-8 mx-auto max-w-lg h-full bg-white rounded-lg border border-sky-400 sm:w-4/5">
+          <h2 className="mb-3 text-xl font-semibold text-gray-700">
+            Choose a Username:
+          </h2>
+          <Form method="post" id="username-form">
+            <Input
+              name="username"
+              placeholder="Choose a Username"
+              required
+              maxLength={32}
+              defaultValue={username}
+            />
+            <button disabled type="submit" style={{ display: 'none' }} />
+          </Form>
+          <div className="mt-4">
+            <Button
+              type="submit"
+              form="username-form"
+              formAction="/new"
+              full="true"
+            >
+              Create a Private Board
+            </Button>
+          </div>
         </div>
-      </div>
-      {/* <label>
+        {/* <label>
         Enter a Public Room:
         <br />
         <input
@@ -69,6 +70,7 @@ export default function Index() {
       <button type="submit" form="username-form" formAction="/join">
         GO!
       </button> */}
-    </main>
+      </main>
+    </div>
   );
 }

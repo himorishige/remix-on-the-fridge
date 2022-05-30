@@ -30,7 +30,6 @@ export const StickyArea: React.FC<Props> = ({ socket, latestTasks }) => {
 
   const completeTaskHandler = (params: CompleteTaskEvent) => {
     params.event.preventDefault();
-    console.log(params.taskId);
 
     if (latestTasksStore.some(({ id }) => id === params.taskId)) {
       setLatestTasksStore((previousArray) =>
