@@ -1,16 +1,24 @@
 # Stick notes on the fridge
 
 This is an application that imagines writing notes on sticky notes on refrigerator doors.  
-In Japan, many people leave notes on their refrigerators about what they need for shopping or school, and stick them on the refrigerator.
+In Japan, many people leave notes on their fridges about what they need for shopping or school, and stick them on the fridge.
 
 You can consult with family members or friends via chat, assign a person to be in charge, and record the information as a sticky note. You can also filter who is in charge to make it easier to see your tasks. The people who can be assigned are either yourself or people who are online.
+
+- Applications are delivered using Cloudflare Workers.
+- Message and sticky note updates are implemented using Durable Objects.
+- Workers KV is used to manage login sessions.
+- May be largely replaced when D1 is released🤔
 
 ## Quick Start
 
 1. First, create a new private board.
 2. Choose your own username and log in.
 3. Copy the QR code or URL from the share icon and send it to the people you want to share it with.
-4. Make a note of the board URL so you don't forget it.
+4. Communicate with family and friends via messages!
+5. Check out what you want to leave on the sticky note from your message. At that time, choose the person you would like to ask.
+6. When a task is completed, the sticky note can be marked as done.
+7. Make a note of the board URL so you don't forget it.
 
 ## What's inside?
 
