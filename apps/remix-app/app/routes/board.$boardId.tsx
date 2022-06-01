@@ -1,4 +1,4 @@
-import { createRef, useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useEffect } from 'react';
 import type { ActionFunction, LoaderFunction } from '@remix-run/cloudflare';
 import { json, redirect } from '@remix-run/cloudflare';
@@ -19,7 +19,6 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 import { StickyArea } from '~/components/layout';
 import { MessageArea } from '~/components/layout/MessageArea';
 import toast, { Toaster } from 'react-hot-toast';
-import html2canvas from 'html2canvas';
 
 type LoaderData = {
   loaderCalls: number;

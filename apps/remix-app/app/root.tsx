@@ -23,6 +23,10 @@ export const meta: MetaFunction = ({ data }) => {
     'og:url': data?.domain,
     'og:image': `${data?.domain}/ogp-on-the-fridge.png`,
     'og:site_name': 'on the fridge powered by Remix',
+    'twitter:card': 'summary_large_image',
+    'twitter:site': '@_himorishige',
+    'twitter:title': 'on the fridge powered by Remix',
+    'twitter:image': `${data?.domain}/ogp-on-the-fridge.png`,
   };
 };
 
