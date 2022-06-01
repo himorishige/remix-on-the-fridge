@@ -18,7 +18,8 @@ You can consult with family members or friends via chat, assign a person to be i
 4. Communicate with family and friends via messages!
 5. Check out what you want to leave on the sticky note from your message. At that time, choose the person you would like to ask.
 6. When a task is completed, the sticky note can be marked as done.
-7. Make a note of the board URL so you don't forget it.
+7. You can also export your assigned stickies as images.
+8. Make a note of the board URL so you don't forget it.
 
 ## What's inside?
 
