@@ -25,6 +25,11 @@ You can consult with family members or friends via chat, assign a person to be i
 
 This turborepo uses Yarn as a package manager. It includes the following packages/apps/services:
 
+- [Remix](https://remix.run)
+- [Tailwind Css](https://tailwindcss.com)
+- [Jotai](https://jotai.org/)
+- [turborepo](https://turborepo.org/)
+
 ### Apps and Packages
 
 - `apps/remix-app`: [Remix](https://remix.run) app
@@ -46,6 +51,13 @@ This repository uses turborepo, and selected when choosing which package manager
 yarn install
 ```
 
+Workers KV must be created before deployment.  
+Then, it is necessary to add KV-id to `wrangler.toml`.
+
+```
+wrangler kv:namespace create "SESSION_KV"
+```
+
 ### Build
 
 To build all apps and packages, run the following command:
@@ -65,6 +77,14 @@ yarn dev
 ```
 
 ### Deploy
+
+Secret must be created before deployment.  
+
+```
+wrangler secret put SESSION_SECRET
+```
+
+To deploy all apps and packages, run the following command:
 
 ```
 yarn deploy
