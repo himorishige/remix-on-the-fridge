@@ -7,7 +7,7 @@
 }
 
 .corner_box_outer {
-  box-shadow: inset 0 0 30px rgba(255, 219, 112, 0.8);
+  /* box-shadow: inset 0 0 30px rgba(255, 219, 112, 0.8); */
 }
 
 .corner_box:before {
