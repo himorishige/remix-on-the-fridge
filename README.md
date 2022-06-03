@@ -1,4 +1,4 @@
-# Stick notes on the fridge
+# Sticky notes on the fridge
 
 This is an application that imagines writing notes on sticky notes on refrigerator doors.  
 In Japan, many people leave notes on their fridges about what they need for shopping or school, and stick them on the fridge.
