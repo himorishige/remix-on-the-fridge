@@ -1,5 +1,7 @@
 # Sticky notes on the fridge
 
+![on-the-fridge-mv](https://user-images.githubusercontent.com/71954454/172291415-a2ccc024-ef79-4192-9467-94a69c40bb9c.png)
+
 This is an application that imagines writing notes on sticky notes on refrigerator doors.  
 In Japan, many people leave notes on their fridges about what they need for shopping or school, and stick them on the fridge.
 
@@ -26,7 +28,7 @@ You can consult with family members or friends via chat, assign a person to be i
 This turborepo uses Yarn as a package manager. It includes the following packages/apps/services:
 
 - [Remix](https://remix.run)
-- [Tailwind Css](https://tailwindcss.com)
+- [Tailwind CSS](https://tailwindcss.com)
 - [Jotai](https://jotai.org/)
 - [turborepo](https://turborepo.org/)
 
